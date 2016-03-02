@@ -2,7 +2,6 @@
 
 ; ; Say "Hello world" upon doing (reset) and (run)
 (defrule hello_world
-	(initial-fact)
 	=>
 	(printout t "Hello world" crlf))    
 	
@@ -17,10 +16,10 @@
 	
 ; ; Player template (players other than myself)
 (deftemplate player
-	(slot player_id (type INTEGER) (default 0)) 	; player id that should be unique
+	(slot player_id (type INTEGER) (default 0)) 		; player id that should be unique
 	(slot name (type STRING) (default "nameless"))	; name MIGHT NOT be unique
-	(slot money (type FLOAT) (default 0.0))			; money that the player has to play, excluding the bet they have made
-	(slot bet (type FLOAT) (default 0.0)))			; the bet that the player has made at the moment
+	(slot money (type FLOAT) (default 0.0))				; money that the player has to play, excluding the bet they have made
+	(slot bet (type FLOAT) (default 0.0)))				; the bet that the player has made at the moment
 
 	
 ; ; Game template (keeps the game information)
@@ -30,3 +29,9 @@
 	(slot call_amount (type FLOAT) (default 0.0))	; amount being called
 	(slot fold_amount (type FLOAT) (default 0.0))) 	; amount needed to fold
 	
+	
+; ; The initial facts
+(deffacts the-facts
+	(self (player_id 0) (name "Allwin Baby") (money 13.37))
+	(player (player_id 1) (name "Bad Guy 1") (money 13.36))
+	(game (round 0) (pot 0.0) (call_amount 0.02) (fold_amount 0.02)))
