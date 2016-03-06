@@ -15,7 +15,7 @@
 (deffacts the-facts
 (card (suit a) (value 9))
 (card (suit c) (value 9))
-(card (suit b) (value 10))
+(card (suit b) (value 9))
 (card (suit d) (value 12))
 (card (suit a) (value 13)))
 
@@ -52,9 +52,9 @@
 (defrule full-house
 (card (value ?num)(suit ?a))
 (card (value ?num)(suit ?b&:(neq ?a ?b)))
-(card (value ?num1)(suit ?c))
-(card (value ?num1)(suit ?d&:(neq ?c ?d)))
-(card (value ?num1)(suit ?e&:(and (neq ?c ?e)(neq ?d ?e))))
+(card (value ?num1&:(neq ?num1 ?num))(suit ?c))
+(card (value ?num1&:(neq ?num1 ?num))(suit ?d&:(neq ?c ?d)))
+(card (value ?num1&:(neq ?num1 ?num))(suit ?e&:(and (neq ?c ?e)(neq ?d ?e))))
 =>
 (assert (hand (pattern full-house))))
 
@@ -102,8 +102,9 @@
 =>
 (assert (hand (pattern one-pair))))
 
+
 ; ; Print hand
 (defrule print-hand
 (hand (pattern ?x))
 =>
-(printout t crlf "Your pattern is: " ?x "." crlf crlf)(halt))
+(printout t crlf "Your pattern is: " ?x "." crlf)(halt))
