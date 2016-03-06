@@ -14,9 +14,9 @@
 ; ; i.e. Player reads his cards
 (deffacts the-facts
 (card (suit a) (value 9))
-(card (suit a) (value 10))
-(card (suit a) (value 11))
-(card (suit a) (value 12))
+(card (suit c) (value 9))
+(card (suit b) (value 9))
+(card (suit d) (value 9))
 (card (suit a) (value 13)))
 
 ; ; Detection of Royal-Flush
@@ -77,6 +77,14 @@
 (card (value ?num4&:(eq ?num4 (+ ?num 4))))
 =>
 (assert (hand (pattern straight))))
+
+; ; Detection of three-of-a-kind
+(defrule three-of-a-kind
+(card (value ?num)(suit ?a))
+(card (value ?num)(suit ?b&:(neq ?a ?b)))
+(card (value ?num)(suit ?c&:(and (neq ?a ?c)(neq ?b ?c))))
+=>
+(assert (hand (pattern three-of-a-kind))))
 
 ; ; Print hand
 (defrule print-hand
