@@ -18,7 +18,7 @@
 ; ; The initial facts
 ; ; i.e. Player reads his public-cards
 (deffacts the-facts
-(public-card (suit a) (value 11))
+(public-card (suit a) (value 9))
 (public-card (suit a) (value 13))
 (public-card (suit a) (value 14))
 (public-card (suit a) (value 10))
@@ -66,11 +66,44 @@
 
 ; ; Suspicion of Straight-Flush
 (defrule suspect-straight-flush
-(public-card (value ?num&:(< ?num 10))(suit ?suit))
-(public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?suit))
-(public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?suit))
-(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?suit))
-(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?suit))
+(or
+
+(and (public-card (value ?num&:(< ?num 10))(suit ?a))
+(or
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))
+(not(user-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a)))(not(user-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))
+(not(user-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a)))(not(user-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a)))(not(user-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))
+(not(user-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a)))(not(user-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a)))(not(user-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))))
+
+(and (public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a)))(not(user-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))))
+))
+
+(and (not(user-card (value ?num&:(< ?num 10))(suit ?a)))
+(or
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))
+(not(user-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?a))(public-card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?a))(public-card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?a))
+(not(user-card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?a))))
+
+)))
 =>
 (assert (suspicion (pattern suspicion-straight-flush))))
 
