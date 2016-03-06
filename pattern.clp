@@ -14,9 +14,10 @@
 ; ; i.e. Player reads his cards
 (deffacts the-facts
 (card (suit a) (value 9))
-(card (suit c) (value 9))
-(card (suit b) (value 10))
-(card (suit d) (value 12))
+(card (suit a) (value 2))
+(card (suit c) (value 2))
+(card (suit a) (value 10))
+(card (suit a) (value 12))
 (card (suit a) (value 13)))
 
 ; ; Detection of Royal-Flush
@@ -63,8 +64,8 @@
 (card (suit ?suit)(value ?num1))
 (card (suit ?suit)(value ?num2&:(neq ?num1 ?num2)))
 (card (suit ?suit)(value ?num3&:(and (neq ?num3 ?num1)(neq ?num3 ?num2))))
-(card (suit ?suit)(value ?num4&:(and (and (neq ?num4 ?num1)(neq ?num4 ?num2)) (neq ?num4 ?num3))))
-(card (suit ?suit)(value ?num5&:(and (and (neq ?num5 ?num1)(neq ?num5 ?num2)) (and (neq ?num5 ?num3) (neq ?num5 ?num4)))))
+(card (suit ?suit)(value ?num4&:(and (neq ?num4 ?num1)(neq ?num4 ?num2)(neq ?num4 ?num3))))
+(card (suit ?suit)(value ?num5&:(and (neq ?num5 ?num1)(neq ?num5 ?num2)(neq ?num5 ?num3)(neq ?num5 ?num4))))
 =>
 (assert (hand (pattern flush))))
 
