@@ -13,11 +13,11 @@
 ; ; The initial facts
 ; ; i.e. Player reads his cards
 (deffacts the-facts
-(card (suit i) (value 9))
-(card (suit i) (value 10))
-(card (suit i) (value 11))
-(card (suit i) (value 12))
-(card (suit i) (value 13)))
+(card (suit a) (value 10))
+(card (suit b) (value 10))
+(card (suit c) (value 11))
+(card (suit d) (value 11))
+(card (suit i) (value 11)))
 
 ; ; Detection of Royal-Flush
 (defrule royal-flush
@@ -47,6 +47,16 @@
 (card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?c ?d))))
 =>
 (assert (hand (pattern four-of-a-kind))))
+
+; ; Detection of full-house
+(defrule full-house
+(card (value ?num)(suit ?a))
+(card (value ?num)(suit ?b&:(neq ?a ?b)))
+(card (value ?num1)(suit ?c))
+(card (value ?num1)(suit ?d&:(neq ?c ?d)))
+(card (value ?num1)(suit ?e&:(and (neq ?c ?e)(neq ?d ?e))))
+=>
+(assert (hand (pattern full-house))))
 
 ; ; Print hand
 (defrule print-hand
