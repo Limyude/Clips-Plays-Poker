@@ -18,12 +18,12 @@
 ; ; The initial facts
 ; ; i.e. Player reads his public-cards
 (deffacts the-facts
-(public-card (suit a) (value 11))
-(public-card (suit a) (value 13))
-(public-card (suit a) (value 14))
+(public-card (suit a) (value 12))
+(public-card (suit b) (value 12))
+(public-card (suit c) (value 12))
 (public-card (suit a) (value 10))
-(public-card (suit c) (value 2))
-(user-card (suit c) (value 12))
+(public-card (suit a) (value 3))
+(user-card (suit d) (value 11))
 (user-card (suit a) (value 2)))
 
 ; ; Suspicion of Royal-Flush
@@ -76,10 +76,22 @@
 
 ; ; Suspicion of four-of-a-kind
 (defrule suspect-four-of-a-kind
+(or
+
+(and
 (public-card (value ?num)(suit ?a))
 (public-card (value ?num)(suit ?b&:(neq ?a ?b)))
 (public-card (value ?num)(suit ?c&:(and (neq ?a ?c)(neq ?b ?c))))
-(public-card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?c ?d))))
+(not (user-card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?c ?d))))))
+
+(and
+(public-card (value ?num)(suit ?a))
+(public-card (value ?num)(suit ?b&:(neq ?a ?b)))
+(not (user-card (value ?num)(suit ?c&:(and (neq ?a ?c)(neq ?b ?c)))))
+(not (user-card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?d ?c))))))
+
+)
+
 =>
 (assert (suspicion (pattern suspicion-four-of-a-kind))))
 
