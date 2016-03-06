@@ -14,7 +14,7 @@
 ; ; i.e. Player reads his cards
 (deffacts the-facts
 (card (suit i) (value 9))
-(card (suit i) (value 10))
+(card (suit i) (value 14))
 (card (suit i) (value 11))
 (card (suit i) (value 12))
 (card (suit i) (value 13)))
@@ -47,6 +47,17 @@
 (card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?c ?d))))
 =>
 (assert (hand (pattern four-of-a-kind))))
+
+; ; Detection of flush
+(defrule flush
+(card (suit ?suit)(value ?num1))
+(card (suit ?suit)(value ?num2&:(neq ?num1 ?num2)))
+(card (suit ?suit)(value ?num3&:(and (neq ?num3 ?num1)(neq ?num3 ?num2))))
+(card (suit ?suit)(value ?num4&:(and (and (neq ?num4 ?num1)(neq ?num4 ?num2)) (neq ?num4 ?num3))))
+(card (suit ?suit)(value ?num5&:(and (and (neq ?num5 ?num1)(neq ?num5 ?num2)) (and (neq ?num5 ?num3) (neq ?num5 ?num4)))))
+=>
+(assert (hand (pattern flush))))
+
 
 ; ; Print hand
 (defrule print-hand
