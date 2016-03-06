@@ -15,8 +15,8 @@
 (deffacts the-facts
 (card (suit a) (value 9))
 (card (suit c) (value 9))
-(card (suit b) (value 9))
-(card (suit d) (value 9))
+(card (suit b) (value 10))
+(card (suit d) (value 12))
 (card (suit a) (value 13)))
 
 ; ; Detection of Royal-Flush
@@ -75,6 +75,22 @@
 (card (value ?num)(suit ?c&:(and (neq ?a ?c)(neq ?b ?c))))
 =>
 (assert (hand (pattern three-of-a-kind))))
+
+; ; Detection of two-pair
+(defrule two-pair
+(card (value ?num)(suit ?a))
+(card (value ?num)(suit ?b&:(neq ?a ?b)))
+(card (value ?num1&:(neq ?num1 ?num))(suit ?c))
+(card (value ?num1&:(neq ?num1 ?num))(suit ?d&:(neq ?c ?d)))
+=>
+(assert (hand (pattern two-pair))))
+
+; ; Detection of one-pair
+(defrule one-pair
+(card (value ?num)(suit ?a))
+(card (value ?num)(suit ?b&:(neq ?a ?b)))
+=>
+(assert (hand (pattern one-pair))))
 
 ; ; Print hand
 (defrule print-hand
