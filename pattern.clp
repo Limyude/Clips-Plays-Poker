@@ -8,16 +8,16 @@
 
 ; ; poker hand
 (deftemplate hand
-(slot pattern (type SYMBOL)))
+(slot pattern (type SYMBOL) (default NIL)))
 
 ; ; The initial facts
 ; ; i.e. Player reads his cards
 (deffacts the-facts
-(card (suit a) (value 10))
-(card (suit b) (value 10))
-(card (suit c) (value 10))
-(card (suit d) (value 10))
-(card (suit a) (value 8)))
+(card (suit i) (value 9))
+(card (suit i) (value 10))
+(card (suit i) (value 11))
+(card (suit i) (value 12))
+(card (suit i) (value 13)))
 
 ; ; Detection of Royal-Flush
 (defrule royal-flush
@@ -32,19 +32,19 @@
 ; ; Detection of Straight-Flush
 (defrule straight-flush
 (card (value ?num&:(< ?num 10))(suit ?suit))
-(card (value ?num+1)(suit ?suit))
-(card (value ?num+2)(suit ?suit))
-(card (value ?num+3)(suit ?suit))
-(card (value ?num+4)(suit ?suit))
+(card (value ?num1&:(eq ?num1 (+ ?num 1)))(suit ?suit))
+(card (value ?num2&:(eq ?num2 (+ ?num 2)))(suit ?suit))
+(card (value ?num3&:(eq ?num3 (+ ?num 3)))(suit ?suit))
+(card (value ?num4&:(eq ?num4 (+ ?num 4)))(suit ?suit))
 =>
 (assert (hand (pattern straight-flush))))
 
 ; ; Detection of four-of-a-kind
 (defrule four-of-a-kind
 (card (value ?num)(suit ?a))
-(card (value ?num)(suit ?b))
-(card (value ?num)(suit ?c))
-(card (value ?num)(suit ?d))
+(card (value ?num)(suit ?b&:(neq ?a ?b)))
+(card (value ?num)(suit ?c&:(and (neq ?a ?c)(neq ?b ?c))))
+(card (value ?num)(suit ?d&:(and (neq ?a ?d)(neq ?b ?d)(neq ?c ?d))))
 =>
 (assert (hand (pattern four-of-a-kind))))
 
