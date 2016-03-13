@@ -20,7 +20,7 @@
 (deffacts the-facts
 (public-card (suit a) (value 9))
 (public-card (suit d) (value 2))
-(public-card (suit a) (value 8))
+(public-card (suit b) (value 8))
 (public-card (suit a) (value 10))
 (public-card (suit a) (value 3))
 (user-card (suit a) (value 12))
@@ -152,11 +152,38 @@
 
 ; ; Suspicion of straight
 (defrule suspicion-straight
-(public-card (value ?num&:(< ?num 10))(suit ?suit))
-(public-card (value ?num1&:(eq ?num1 (+ ?num 1))))
-(public-card (value ?num2&:(eq ?num2 (+ ?num 2))))
-(public-card (value ?num3&:(eq ?num3 (+ ?num 3))))
-(public-card (value ?num4&:(eq ?num4 (+ ?num 4))))
+(or
+
+(and (public-card (value ?num&:(< ?num 10)))
+(or
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1))))(public-card (value ?num2&:(eq ?num2 (+ ?num 2))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1))))(public-card (value ?num3&:(eq ?num3 (+ ?num 3))))
+
+(and (public-card (value ?num1&:(eq ?num1 (+ ?num 1))))(public-card (value ?num4&:(eq ?num4 (+ ?num 4))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num 2))))(public-card (value ?num3&:(eq ?num3 (+ ?num 3))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num 2))))(public-card (value ?num4&:(eq ?num4 (+ ?num 4))))
+
+(and (public-card (value ?num3&:(eq ?num3 (+ ?num 3))))(public-card (value ?num4&:(eq ?num4 (+ ?num 4))))
+))
+
+(and (public-card (value ?num1&:(< ?num1 10)))
+(or
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num1 1))))(public-card (value ?num3&:(eq ?num3 (+ ?num1 2))))
+
+(and (public-card (value ?num2&:(eq ?num2 (+ ?num1 1))))(public-card (value ?num4&:(eq ?num4 (+ ?num1 3))))
+
+(and (public-card (value ?num3&:(eq ?num3 (+ ?num1 2))))(public-card (value ?num4&:(eq ?num4 (+ ?num1 3))))
+))
+
+(and (public-card (value ?num2&:(< ?num2 10)))
+(or
+(and (public-card (value ?num3&:(eq ?num3 (+ ?num2 1))))(public-card (value ?num4&:(eq ?num4 (+ ?num2 2))))
+))
+
+)
 =>
 (assert (suspicion (pattern suspicion-straight))))
 
