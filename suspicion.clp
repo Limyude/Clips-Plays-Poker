@@ -143,7 +143,12 @@
 (assert (suspicion (pattern suspicion-full-house))))
 
 ; ; Suspicion of flush
-
+(defrule suspicion-flush
+(public-card (suit ?suit)(value ?num1))
+(public-card (suit ?suit)(value ?num2&:(neq ?num1 ?num2)))
+(public-card (suit ?suit)(value ?num3&:(and (neq ?num3 ?num1)(neq ?num3 ?num2))))
+=>
+(assert (suspicion (pattern suspicion-flush))))
 
 ; ; Suspicion of straight
 (defrule suspicion-straight
@@ -163,12 +168,6 @@
 =>
 (assert (suspicion (pattern suspicion-three-of-a-kind))))
 
-; ; Suspicion of two-pair
-(defrule suspicion-two-pair
-(public-card (value ?num)(suit ?a))
-(public-card (value ?num)(suit ?b&:(neq ?a ?b)))
-=>
-(assert (suspicion (pattern suspicion-two-pair))))
 
 ; ; Print suspicion
 (defrule print-suspicion
