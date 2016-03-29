@@ -27,8 +27,11 @@
 
 ; ; MODULE DEFINITIONS
 (defmodule MAIN (export ?ALL))
+(defmodule OPPONENT-HAND-DETERMINATION (import MAIN ?ALL))
+(defmodule OWN-HAND-DETERMINATION (import MAIN ?ALL))
+(defmodule STRONGEST-OPPONENT-DETERMINATION (import MAIN ?ALL))
+(defmodule STRATEGY-SELECTION (import MAIN ?ALL))
 (defmodule MOVE-SELECTION (import MAIN ?ALL))
-
 
 
 
