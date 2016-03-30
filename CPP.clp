@@ -114,7 +114,7 @@
 	
 ; ; Control facts
 (deffacts MAIN::control
-	(module-sequence MOVE-SELECTION))
+	(module-sequence OPPONENT-HAND-DETERMINATION OWN-HAND-DETERMINATION STRONGEST-OPPONENT-DETERMINATION SRATEGY-SELECTION MOVE-SELECTION))
 
 	
 ; ; Control rule to change focus
