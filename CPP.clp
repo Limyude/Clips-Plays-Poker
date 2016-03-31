@@ -136,7 +136,7 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "Allwin Baby") (money 13.37))
+	(self (player_id 0) (name "The Bot") (money 13.37))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36))
 	(strongest_player (player_id 1))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 0.0)))
@@ -177,17 +177,18 @@
 
 ; ; Check happens before call/all-in
 (defrule MOVE-SELECTION::default-move-selection-check
-	(declare (salience -2))		
-	(should_perform_default_move)
+	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
+	(should_perform_default_move)		; ; Asserted by other rules
 	(can_check)							; ; Asserted by other rules
 	=>
 	(assert (move (move_type ?*CHECK*))))
 	
 ; ; Call happens if check could not happen
 (defrule MOVE-SELECTION::default-move-selection-call
-	(declare (salience -3))		
-	(should_perform_default_move)
+	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
+	(should_perform_default_move)		; ; Asserted by other rules
 	(can_call)							; ; Asserted by other rules
+	(not (can_check))					; ; Asserted by other rules
 	(game (current_bet ?current_bet))
 	?self <- (self)
 	=>
@@ -196,14 +197,16 @@
 
 ; ; All-in happens if both check and call could not happen
 (defrule MOVE-SELECTION::default-move-selection-all-in
-	(declare (salience -4))		
-	(should_perform_default_move)
+	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
+	(should_perform_default_move)		; ; Asserted by other rules
 	(can_all_in)						; ; Asserted by other rules
+	(not (can_check))					; ; Asserted by other rules
+	(not (can_call))					; ; Asserted by other rules
 	(game (current_bet ?current_bet))
-	?self <- (self)
+	?self <- (self (money ?mymoney))
 	=>
 	(assert (move (move_type ?*ALL_IN*) (current_bet ?current_bet)))
-	(modify ?self (bet ?current_bet)))
+	(modify ?self (bet ?mymoney)))
 		
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -215,6 +218,7 @@
 ; ; Cut losses strategy
 ; ; *********** TO DO ***********
 (defrule MOVE-SELECTION::cut-losses-strategy
+	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*CUTLOSSES_STRATEGY*)))
 	=>
 	(printout t "My strategy: " ?*CUTLOSSES_STRATEGY* crlf))
@@ -223,6 +227,7 @@
 ; ; Defensive strategy
 ; ; *********** TO DO ***********
 (defrule MOVE-SELECTION::defensive-strategy
+	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
 	=>
 	(printout t "My strategy: " ?*DEFENSIVE_STRATEGY* crlf))
@@ -231,14 +236,16 @@
 ; ; Induce folds strategy
 ; ; *********** TO DO ***********
 (defrule MOVE-SELECTION::induce-folds-strategy
+	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)))
 	=>
 	(printout t "My strategy: " ?*INDUCEFOLDS_STRATEGY* crlf))
 
 
-; ; Induce folds strategy
+; ; Induce bets strategy
 ; ; *********** TO DO ***********
 (defrule MOVE-SELECTION::induce-bets-strategy
+	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
 	=>
 	(printout t "My strategy: " ?*INDUCEBETS_STRATEGY* crlf))
