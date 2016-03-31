@@ -140,10 +140,10 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*DEFENSIVE_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*INDUCEBETS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 0) (pot 0.0) (current_bet 1.34) (min_allowed_bet 1.0)))
+	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
 	
 	
 	
@@ -306,12 +306,62 @@
 
 
 ; ; Induce bets strategy
-; ; *********** TO DO ***********
-(defrule MOVE-SELECTION::induce-bets-strategy
+; ; When able to do both check/bet, randomly pick one, favouring value bet over check
+(defrule MOVE-SELECTION::induce-bets-strategy-randomly-value-bet-or-check
 	(not (move))							; ; Have not made a move
-	(self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
+	(can_bet)
+	(can_check)
+	(game (min_allowed_bet ?minbet))
 	=>
-	(printout t "My strategy: " ?*INDUCEBETS_STRATEGY* crlf))
+	(bind ?roll (mod (random) 4))
+	; ; ; (printout t "Rolled [0-3] a " ?roll crlf)	; ; For debugging purposes
+	(if (>= ?roll 3)	; ; 1 in 4 chance to check instead of value bet
+		then
+		(assert (move (move_type ?*CHECK*)))
+		else
+		(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+		(modify ?self (bet ?minbet))))
+; ; When unable to bet but able to check, just check
+(defrule MOVE-SELECTION::induce-bets-strategy-check
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
+	(can_check)
+	(not (can_bet))
+	=>
+	(assert (move (move_type ?*CHECK*))))
+; ; When unable to check but able to bet (should NOT happen, normally)
+(defrule MOVE-SELECTION::induce-bets-strategy-value-bet
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
+	(can_bet)
+	(not (can_check))
+	(game (min_allowed_bet ?minbet))
+	=>
+	(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+	(modify ?self (bet ?minbet)))
+; ; When unable to do check/bet but able to call, then we should call
+(defrule MOVE-SELECTION::induce-bets-strategy-call
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
+	(can_call)
+	(not (can_bet))
+	(not (can_check))
+	(game (current_bet ?current_bet))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
+	(modify ?self (bet ?current_bet)))
+; ; When unable to do any of check/bet/call, we still want to stay in the game! So, all in!!!
+(defrule MOVE-SELECTION::induce-bets-strategy-all-in
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)) (money ?mymoney))
+	(can_all_in)
+	(not (can_bet))
+	(not (can_check))
+	(not (can_call))
+	=>
+	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
+	(modify ?self (bet ?mymoney)))
 
 ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; 
@@ -335,7 +385,7 @@
 	(printout t "Move selected is: " ?move_type)
 	(if (subsetp (create$ ?move_type) (create$ ?*FOLD* ?*CALL* ?*BET* ?*RAISE* ?*ALL_IN*)) ; ; Each of these moves will have a meaningful current-bet value, so print it
 		then
-		(printout t " " ?current_bet))
+		(printout t " $" ?current_bet))
 	(printout t crlf))
 	
 
