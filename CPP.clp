@@ -140,7 +140,7 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*INDUCEBETS_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*INDUCEFOLDS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
@@ -295,17 +295,51 @@
 	(assert (move (move_type ?*FOLD*) (current_bet ?mybet))))
 	
 	
-
-; ; Induce folds strategy
-; ; *********** TO DO ***********
-(defrule MOVE-SELECTION::induce-folds-strategy
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Induce folds strategy ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; When able to bet, perform a big bet to induce fold
+(defrule MOVE-SELECTION::induce-folds-strategy-big-bet
 	(not (move))							; ; Have not made a move
-	(self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)))
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)) (money ?mymoney))
+	(can_bet)
+	(game (min_allowed_bet ?minbet))
 	=>
-	(printout t "My strategy: " ?*INDUCEFOLDS_STRATEGY* crlf))
+	(bind ?high_amount (* 0.3 ?mymoney))	; ; 30% of my money
+	(if (> ?high_amount ?minbet)
+		then
+		(assert (move (move_type ?*BET*) (current_bet ?high_amount)))
+		(modify ?self (bet ?high_amount))
+		else
+		(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+		(modify ?self (bet ?minbet))))
+; ; When unable to bet but able to raise, perform a big raise to induce fold
+(defrule MOVE-SELECTION::induce-folds-strategy-big-raise
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)) (money ?mymoney))
+	(can_raise)
+	(not (can_bet))
+	(game (current_bet ?current_bet) (min_allowed_bet ?minbet))
+	=>
+	(bind ?high_amount (* 0.3 ?mymoney))	; ; 30% of my money
+	(bind ?raise_amount (max (- ?high_amount ?current_bet) ?minbet))
+	(bind ?new_bet (+ ?current_bet ?raise_amount))
+	(assert (move (move_type ?*RAISE*) (current_bet ?new_bet)))
+	(modify ?self (bet ?new_bet)))
+; ; When unable to bet AND unable to raise, perform all in
+(defrule MOVE-SELECTION::induce-folds-strategy-all-in
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)) (money ?mymoney))
+	(can_all_in)
+	(not (can_bet))
+	(not (can_raise))
+	=>
+	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
+	(modify ?self (bet ?mymoney)))
 
-
-; ; Induce bets strategy
+; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Induce bets strategy;
+; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; When able to do both check/bet, randomly pick one, favouring value bet over check
 (defrule MOVE-SELECTION::induce-bets-strategy-randomly-value-bet-or-check
 	(not (move))							; ; Have not made a move
@@ -362,6 +396,7 @@
 	=>
 	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 	(modify ?self (bet ?mymoney)))
+	
 
 ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; 
