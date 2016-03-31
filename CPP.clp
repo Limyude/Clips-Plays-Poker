@@ -73,7 +73,7 @@
 	(slot name (type STRING) (default "nameless"))		; name MIGHT NOT be unique
 	(slot money (type FLOAT) (default 0.0))				; money that the player has to play, excluding the bet they have made
 	(slot bet (type FLOAT) (default 0.0))				; the bet that the player has made at the moment
-	(multislot move (type SYMBOL) (default ?DERIVE)))	; the move that was taken by the player
+	(slot move (type SYMBOL)))							; the move that was taken by the player
 
 	
 ; ; Game template (keeps the game information)
@@ -114,7 +114,7 @@
 	
 ; ; Control facts
 (deffacts MAIN::control
-	(module-sequence OPPONENT-HAND-DETERMINATION OWN-HAND-DETERMINATION STRONGEST-OPPONENT-DETERMINATION SRATEGY-SELECTION MOVE-SELECTION))
+	(module-sequence OPPONENT-HAND-DETERMINATION OWN-HAND-DETERMINATION STRONGEST-OPPONENT-DETERMINATION STRATEGY-SELECTION MOVE-SELECTION))
 
 	
 ; ; Control rule to change focus
@@ -136,9 +136,9 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37))
-	(player (player_id 1) (name "Bad Guy 1") (money 13.36))
-	(strongest_player (player_id 1))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*CUTLOSSES_STRATEGY*))
+	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (move nil))
+	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 0.0)))
 	
 	
@@ -215,13 +215,20 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
-; ; Cut losses strategy
-; ; *********** TO DO ***********
-(defrule MOVE-SELECTION::cut-losses-strategy
+; ; Cut losses strategy (check/fold)
+(defrule MOVE-SELECTION::cut-losses-strategy-check
 	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*CUTLOSSES_STRATEGY*)))
+	(can_check)
 	=>
-	(printout t "My strategy: " ?*CUTLOSSES_STRATEGY* crlf))
+	(assert (move (move_type check))))
+(defrule MOVE-SELECTION::cut-losses-strategy-fold
+	(not (move))							; ; Have not made a move
+	(self (strategy ?strat&:(eq ?strat ?*CUTLOSSES_STRATEGY*)) (bet ?mybet))
+	(can_fold)
+	(not (can_check))
+	=>
+	(assert (move (move_type fold) (current_bet ?mybet))))
 	
 	
 ; ; Defensive strategy
@@ -231,6 +238,7 @@
 	(self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
 	=>
 	(printout t "My strategy: " ?*DEFENSIVE_STRATEGY* crlf))
+	
 	
 
 ; ; Induce folds strategy
@@ -302,6 +310,14 @@
 	(self (money ?money&:(>= (- ?money ?current_bet) ?min_allowed_bet)))	; ; We can only raise if we have sufficient money to raise the bet at least by the min_allowed_bet
 	=>
 	(assert (can_raise)))
+
+	
+; ; Print out the strategy we are using to select a move
+(defrule MOVE-SELECTION::print-strategy-used
+	(declare (salience 1))
+	(self (strategy ?strat))
+	=>
+	(printout t "My strategy: " ?strat crlf))
 
 	
 ; ; Print out the move selected
