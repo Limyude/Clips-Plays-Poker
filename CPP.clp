@@ -21,18 +21,10 @@
 ; ; TYPE OF MOVE CONSTANTS
 (defglobal ?*FOLD* = fold)
 (defglobal ?*CHECK* = check)
-(defglobal ?*CALL* = call)
 (defglobal ?*BET* = bet)
+(defglobal ?*CALL* = call)
 (defglobal ?*RAISE* = raise)
 (defglobal ?*ALL_IN* = all-in)
-
-; ; POSSIBLE-TO-MOVE? CONSTANTS
-; ; These will be asserted as stand-alone facts, so the bot keeps track of the moves it can take
-; ; (fold & all_in are always possible to do, so they are not included here)
-(defglobal ?*CAN_CHECK* = can_check)
-(defglobal ?*CAN_CALL* = can_call)
-(defglobal ?*CAN_BET* = can_bet)
-(defglobal ?*CAN_RAISE* = can_raise)
 
 
 
@@ -52,10 +44,21 @@
 ; ; 3) call xx.xx (the amount called, which should be equivalent to the current bet)
 ; ; 4) bet xx.xx (the amount betted)
 ; ; 5) raise xx.xx (the amount raised to)
-; ; 6) all-in (amount all-ed in)
+; ; 6) all-in xx.xx (amount all-ed in)
 (deftemplate MAIN::move
 	(slot move_type (type SYMBOL) (default ?DERIVE))
 	(slot current_bet (type FLOAT) (default 0.0)))
+	
+
+; ; Possible move templates
+(deftemplate MAIN::can_fold)
+(deftemplate MAIN::can_check)
+(deftemplate MAIN::can_bet)
+(deftemplate MAIN::can_small_bet)
+(deftemplate MAIN::can_call)
+(deftemplate MAIN::can_small_call)
+(deftemplate MAIN::can_raise)
+(deftemplate MAIN::can_all_in)
 	
 
 ; ; Self template
@@ -106,6 +109,7 @@
 (defmodule OWN-HAND-DETERMINATION (import MAIN ?ALL))
 (defmodule STRONGEST-OPPONENT-DETERMINATION (import MAIN ?ALL))
 (defmodule STRATEGY-SELECTION (import MAIN ?ALL))
+(defmodule POSSIBLE-MOVE-DETERMINATION (import MAIN ?ALL))
 (defmodule MOVE-SELECTION (import MAIN ?ALL))
 
 
@@ -114,7 +118,13 @@
 	
 ; ; Control facts
 (deffacts MAIN::control
-	(module-sequence OPPONENT-HAND-DETERMINATION OWN-HAND-DETERMINATION STRONGEST-OPPONENT-DETERMINATION STRATEGY-SELECTION MOVE-SELECTION))
+	(module-sequence 
+		OPPONENT-HAND-DETERMINATION 
+		OWN-HAND-DETERMINATION 
+		STRONGEST-OPPONENT-DETERMINATION 
+		STRATEGY-SELECTION 
+		POSSIBLE-MOVE-DETERMINATION 
+		MOVE-SELECTION))
 
 	
 ; ; Control rule to change focus
@@ -127,19 +137,13 @@
 	(retract ?list)
 	(assert (module-sequence $?other-modules)))
 	
-
-; ; Say "Hello world" upon doing (reset) and (run)
-(defrule MAIN::hello-world
-	=>
-	(printout t "Hello world, we are in the MAIN module!" crlf))    
-	
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*CUTLOSSES_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*DEFENSIVE_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 0.0)))
+	(game (round 0) (pot 0.0) (current_bet 1.34) (min_allowed_bet 1.0)))
 	
 	
 	
@@ -202,10 +206,9 @@
 	(can_all_in)						; ; Asserted by other rules
 	(not (can_check))					; ; Asserted by other rules
 	(not (can_call))					; ; Asserted by other rules
-	(game (current_bet ?current_bet))
 	?self <- (self (money ?mymoney))
 	=>
-	(assert (move (move_type ?*ALL_IN*) (current_bet ?current_bet)))
+	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 	(modify ?self (bet ?mymoney)))
 		
 
@@ -215,29 +218,81 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
-; ; Cut losses strategy (check/fold)
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Cut losses strategy (check/fold);
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule MOVE-SELECTION::cut-losses-strategy-check
 	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*CUTLOSSES_STRATEGY*)))
 	(can_check)
 	=>
-	(assert (move (move_type check))))
+	(assert (move (move_type ?*CHECK*))))
 (defrule MOVE-SELECTION::cut-losses-strategy-fold
 	(not (move))							; ; Have not made a move
 	(self (strategy ?strat&:(eq ?strat ?*CUTLOSSES_STRATEGY*)) (bet ?mybet))
 	(can_fold)
 	(not (can_check))
 	=>
-	(assert (move (move_type fold) (current_bet ?mybet))))
+	(assert (move (move_type ?*FOLD*) (current_bet ?mybet))))
 	
-	
-; ; Defensive strategy
-; ; *********** TO DO ***********
-(defrule MOVE-SELECTION::defensive-strategy
+; ; ; ; ; ; ; ; ; ; ; ;
+; ; Defensive strategy;
+; ; ; ; ; ; ; ; ; ; ; ;
+; ; When able to do both check/small bet, randomly pick one, favouring check over small bet
+(defrule MOVE-SELECTION::defensive-strategy-randomly-check-or-small-bet
 	(not (move))							; ; Have not made a move
-	(self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
+	?self <- (self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
+	(can_check)
+	(can_small_bet)
+	(game (min_allowed_bet ?minbet))
 	=>
-	(printout t "My strategy: " ?*DEFENSIVE_STRATEGY* crlf))
+	(bind ?roll (mod (random) 4))
+	; ; ; (printout t "Rolled [0-3] a " ?roll crlf)	; ; For debugging purposes
+	(if (>= ?roll 3)	; ; 1 in 4 chance to make a small bet
+		then
+		(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+		(modify ?self (bet ?minbet))
+		else
+		(assert (move (move_type ?*CHECK*)))))
+; ; When unable to small bet but can check, just do the check
+(defrule MOVE-SELECTION::defensive-strategy-check
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
+	(can_check)
+	(not (can_small_bet))
+	=>
+	(assert (move (move_type ?*CHECK*))))
+; ; When unable to check but able to small bet, just do the small bet (NORMALLY THIS SHOULD NOT HAPPEN, but just capture the case anyway)
+(defrule MOVE-SELECTION::defensive-strategy-small-bet
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
+	(can_small_bet)
+	(not (can_check))
+	(game (min_allowed_bet ?minbet))
+	=>
+	(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+	(modify ?self (bet ?minbet)))
+; ; When unable to do check/small bet but able to do small call, do it
+(defrule MOVE-SELECTION::defensive-strategy-small-call
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)))
+	(can_small_call)
+	(not (can_check))
+	(not (can_small_bet))
+	(game (current_bet ?current_bet))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
+	(modify ?self (bet ?current_bet)))
+; ; When unable to do check/small bet/small call, just fold
+(defrule MOVE-SELECTION::defensive-strategy-fold
+	(not (move))							; ; Have not made a move
+	?self <- (self (strategy ?strat&:(eq ?strat ?*DEFENSIVE_STRATEGY*)) (bet ?mybet))
+	(can_fold)
+	(not (can_check))
+	(not (can_small_bet))
+	(not (can_small_call))
+	=>
+	(assert (move (move_type ?*FOLD*) (current_bet ?mybet))))
 	
 	
 
@@ -263,54 +318,6 @@
 ; ; Utility rules ;
 ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; 
-
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; Rules to determine if can play a certain move (fold/check/all-in/bet/call/raise)  ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-
-; ; Determine if can play fold (can ALWAYS fold)
-(defrule MOVE-SELECTION::check-can-fold
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	=>
-	(assert (can_fold)))
-
-; ; Determine if can play check
-(defrule MOVE-SELECTION::check-can-check
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	(game (current_bet 0.0))		; ; We can only check if nobody has yet placed a bet
-	=>
-	(assert (can_check)))
-	
-; ; Determine if can play all-in (can ALWAYS all-in)
-(defrule MOVE-SELECTION::check-can-all-in
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	=>
-	(assert (can_all_in)))
-
-; ; Determine if can play bet
-(defrule MOVE-SELECTION::check-can-bet
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	(game (current_bet 0.0) (min_allowed_bet ?min_allowed_bet))		; ; We can only bet if nobody has yet placed a bet
-	(self (money ?money&:(>= ?money ?min_allowed_bet)))				; ; We must have enough money to play at least the minimum bet
-	=>
-	(assert (can_bet)))
-
-; ; Determine if can play call
-(defrule MOVE-SELECTION::check-can-call
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	(game (current_bet ?current_bet&:(> ?current_bet 0.0)))	; ; We can only call if there has been a bet
-	(self (money ?money&:(>= ?money ?current_bet)))			; ; We must have enough money to call the bet
-	=>
-	(assert (can_call)))
-
-; ; Determine if can play raise
-(defrule MOVE-SELECTION::check-can-raise
-	(declare (salience 5000))		; ; Before selecting a move, it is important to know what moves are legal
-	(game (current_bet ?current_bet&:(> ?current_bet 0.0)) (min_allowed_bet ?min_allowed_bet))	; ; We can only raise if there has been a bet
-	(self (money ?money&:(>= (- ?money ?current_bet) ?min_allowed_bet)))	; ; We can only raise if we have sufficient money to raise the bet at least by the min_allowed_bet
-	=>
-	(assert (can_raise)))
-
 	
 ; ; Print out the strategy we are using to select a move
 (defrule MOVE-SELECTION::print-strategy-used
@@ -326,7 +333,76 @@
 	(move (move_type ?move_type) (current_bet ?current_bet))
 	=>
 	(printout t "Move selected is: " ?move_type)
-	(if (subsetp (create$ ?move_type) (create$ ?*FOLD* ?*CALL* ?*BET* ?*RAISE*)) ; ; Each of these moves will have a meaningful current-bet value, so print it
+	(if (subsetp (create$ ?move_type) (create$ ?*FOLD* ?*CALL* ?*BET* ?*RAISE* ?*ALL_IN*)) ; ; Each of these moves will have a meaningful current-bet value, so print it
 		then
 		(printout t " " ?current_bet))
 	(printout t crlf))
+	
+
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; POSSIBLE-MOVE-DETERMINATION MODULE; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Rules to determine if can play a certain move           ;
+; ; (fold/check/all-in/bet/small-bet/call/small-call/raise) ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+; ; Determine if can play fold (can ALWAYS fold)
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-fold
+	=>
+	(assert (can_fold)))
+
+; ; Determine if can play check
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-check
+	(game (current_bet 0.0))		; ; We can only check if nobody has yet placed a bet
+	=>
+	(assert (can_check)))
+	
+; ; Determine if can play all-in (can ALWAYS all-in)
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-all-in
+	=>
+	(assert (can_all_in)))
+
+; ; Determine if can play bet
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-bet
+	(game (current_bet 0.0) (min_allowed_bet ?minbet))		; ; We can only bet if nobody has yet placed a bet
+	(self (money ?money&:(>= ?money ?minbet)))				; ; We must have enough money to play at least the minimum bet
+	=>
+	(assert (can_bet)))
+	
+; ; Determine if can play small bet (small bet is currently defined as min_allowed_bet)
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-bet
+	(can_bet)						; ; Obviously, to be able to do a small bet we must first satisfy the weaker condition of being able to do a bet
+	(game (min_allowed_bet ?minbet))
+	(self (money ?mymoney&:(>= ?mymoney ?minbet)))
+	=>
+	(assert (can_small_bet)))
+
+; ; Determine if can play call
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-call
+	(game (current_bet ?current_bet&:(> ?current_bet 0.0)))	; ; We can only call if there has been a bet
+	(self (money ?money&:(>= ?money ?current_bet)))			; ; We must have enough money to call the bet
+	=>
+	(assert (can_call)))
+	
+; ; Determine if can play small call (small call is currently defined as <= 10% of player's money)
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-call
+	(can_call)						; ; Obviously, to be able to do a small call we must first satisfy the weaker condition of being able to do a call
+	(game (current_bet ?current_bet))
+	(self (money ?mymoney&:(<= ?current_bet (* 0.1 ?mymoney))))	; ; The current bet to call is <= 10% of player's money
+	=>
+	(assert (can_small_call)))
+
+; ; Determine if can play raise
+(defrule POSSIBLE-MOVE-DETERMINATION::check-can-raise
+	(game (current_bet ?current_bet&:(> ?current_bet 0.0)) (min_allowed_bet ?min_allowed_bet))	; ; We can only raise if there has been a bet
+	(self (money ?money&:(>= (- ?money ?current_bet) ?min_allowed_bet)))	; ; We can only raise if we have sufficient money to raise the bet at least by the min_allowed_bet
+	=>
+	(assert (can_raise)))
