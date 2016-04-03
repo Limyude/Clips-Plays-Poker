@@ -407,16 +407,20 @@
 ; ; Print out the strategy we are using to select a move
 (defrule MOVE-SELECTION::print-strategy-used
 	(declare (salience 1))
+	(not (printed_strategy))
 	(self (strategy ?strat))
 	=>
+	(assert (printed_strategy))
 	(printout t "My strategy: " ?strat crlf))
 
 	
 ; ; Print out the move selected
 (defrule MOVE-SELECTION::print-move
 	(declare (salience -5000))	; ; Printing out a move should be done only when we are actually done selecting, so it is of least concern
+	(not (printed_move))
 	(move (move_type ?move_type) (current_bet ?current_bet))
 	=>
+	(assert (printed_move))
 	(printout t "Move selected is: " ?move_type)
 	(if (subsetp (create$ ?move_type) (create$ ?*FOLD* ?*CALL* ?*BET* ?*RAISE* ?*ALL_IN*)) ; ; Each of these moves will have a meaningful current-bet value, so print it
 		then
