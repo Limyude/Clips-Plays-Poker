@@ -10,6 +10,12 @@
 ; ; FILENAME CONSTANTS
 (defglobal ?*PLAYER_MOVECOUNT_FILENAME* = player_move_count.txt)
 
+; ; PLAYER ATTRIBUTE CONSTANTS
+(defglobal ?*TIGHT* = tight)
+(defglobal ?*LOOSE* = loose)
+(defglobal ?*AGGRESSIVE* = aggressive)
+(defglobal ?*PASSIVE* = passive)
+
 ; ; STRATEGY CONSTANTS
 (defglobal ?*CUTLOSSES_STRATEGY* = cut-losses)						; moves to take: check/fold (like when the villain obviously has a monster hand)
 (defglobal ?*DEFENSIVE_STRATEGY* = defensive)						; moves to take: small bet/check/fold if necessary (like when playing against a possibly strong marginal/monster hand with a marginal hand)
@@ -79,6 +85,8 @@
 	(slot name (type STRING) (default "nameless"))		; name MIGHT NOT be unique
 	(slot money (type FLOAT) (default 0.0))				; money that the player has to play, excluding the bet they have made
 	(slot bet (type FLOAT) (default 0.0))				; the bet that the player has made at the moment
+	(slot tight_loose (type SYMBOL) (default nil))			; is the player tight or loose with starting hand selection?
+	(slot aggressive_passive (type SYMBOL) (default nil))	; is the player aggressive or passive?
 	(slot move (type SYMBOL)))							; the move that was taken by the player
 
 	
@@ -241,13 +249,53 @@
 	(assert (updated_player_move_count_general ?pid))
 	(modify ?pmc (bets_raises (+ ?bets_raises 1))))
 	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Determine the players' playstyles ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+; ; Determine if player is tight
+(defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-tight
+	(declare (salience -1))		; ; Determination done after updating of player move counts
+	?player <- (player (player_id ?pid) (tight_loose nil))
+	(player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds)
+						(preflop_total_moves ?preflop_total_moves&:(<= (* 2 ?preflop_checks_folds) ?preflop_total_moves)))
+	=>
+	(modify ?player (tight_loose ?*TIGHT*)))
+	
+; ; Determine if player is loose
+(defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-loose
+	(declare (salience -1))		; ; Determination done after updating of player move counts
+	?player <- (player (player_id ?pid) (tight_loose nil))
+	(player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds)
+						(preflop_total_moves ?preflop_total_moves&:(> (* 2 ?preflop_checks_folds) ?preflop_total_moves)))
+	=>
+	(modify ?player (tight_loose ?*LOOSE*)))
+	
+; ; Determine if player is aggressive
+(defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-aggressive
+	(declare (salience -1))		; ; Determination done after updating of player move counts
+	?player <- (player (player_id ?pid) (aggressive_passive nil))
+	(player_move_count (player_id ?pid) (checks_calls ?checks_calls)
+						(bets_raises ?bets_raises&:(>= ?bets_raises ?checks_calls)))
+	=>
+	(modify ?player (aggressive_passive ?*AGGRESSIVE*)))
+	
+; ; Determine if player is passive
+(defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-passive
+	(declare (salience -1))		; ; Determination done after updating of player move counts
+	?player <- (player (player_id ?pid) (aggressive_passive nil))
+	(player_move_count (player_id ?pid) (checks_calls ?checks_calls)
+						(bets_raises ?bets_raises&:(< ?bets_raises ?checks_calls)))
+	=>
+	(modify ?player (aggressive_passive ?*PASSIVE*)))
+	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Write the players' move count facts to a file ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 ; ; Empty the file to write to, in order to prepare for the 'write-player-move-count-to-file' rule to append to the file
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::empty-write-file
-	(declare (salience -1))		; ; Emptying should happen before writing, but after updating of the player move counts
+	(declare (salience -2))		; ; Emptying should happen before writing, but after determining of the player's attributes
 	(not (emptied_write_file))
 	=>
 	(assert (emptied_write_file))
@@ -257,7 +305,7 @@
 
 ; ; Write the players' move count facts to a file
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::write-player-move-count-to-file
-	(declare (salience -2))		; ; Write to file only after the updating of the move counts
+	(declare (salience -3))		; ; Write to file only after the determining of the player's attributes
 	(player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds)
 						(preflop_total_moves ?preflop_total_moves)
 						(checks_calls ?checks_calls)
