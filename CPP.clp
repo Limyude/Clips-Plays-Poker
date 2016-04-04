@@ -171,7 +171,7 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEBETS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move nil))
 	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
@@ -657,16 +657,23 @@
 	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
 	(can_bet)
 	(can_check)
-	(game (min_allowed_bet ?minbet))
+	(game (min_allowed_bet ?minbet) (round ?round))
+	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
+	(if (> ?round 0)
+		then
+		(bind ?bet_amount ?postflop_bet_size)
+		else
+		(bind ?bet_amount ?preflop_bet_size))
+	(bind ?bet_amount (max ?bet_amount ?minbet))
 	(bind ?roll (mod (random) 4))
 	; ; ; (printout t "Rolled [0-3] a " ?roll crlf)	; ; For debugging purposes
 	(if (>= ?roll 3)	; ; 1 in 4 chance to check instead of value bet
 		then
 		(assert (move (move_type ?*CHECK*)))
 		else
-		(assert (move (move_type ?*BET*) (current_bet ?minbet)))
-		(modify ?self (bet ?minbet))))
+		(assert (move (move_type ?*BET*) (current_bet ?bet_amount)))
+		(modify ?self (bet ?bet_amount))))
 ; ; When unable to bet but able to check, just check
 (defrule MOVE-SELECTION::induce-bets-strategy-check
 	(not (move))							; ; Have not made a move
@@ -681,10 +688,17 @@
 	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEBETS_STRATEGY*)))
 	(can_bet)
 	(not (can_check))
-	(game (min_allowed_bet ?minbet))
+	(game (min_allowed_bet ?minbet) (round ?round))
+	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
-	(assert (move (move_type ?*BET*) (current_bet ?minbet)))
-	(modify ?self (bet ?minbet)))
+	(if (> ?round 0)
+		then
+		(bind ?bet_amount ?postflop_bet_size)
+		else
+		(bind ?bet_amount ?preflop_bet_size))
+	(bind ?bet_amount (max ?bet_amount ?minbet))
+	(assert (move (move_type ?*BET*) (current_bet ?bet_amount)))
+	(modify ?self (bet ?bet_amount)))
 ; ; When unable to do check/bet but able to call, then we should call
 (defrule MOVE-SELECTION::induce-bets-strategy-call
 	(not (move))							; ; Have not made a move
