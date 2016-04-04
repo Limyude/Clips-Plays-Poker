@@ -69,6 +69,12 @@
 (deftemplate MAIN::can_raise)
 (deftemplate MAIN::can_all_in)
 	
+	
+; ; Bet-sizing helper fact template
+(deftemplate MAIN::bet_sizing_help
+	(slot limpers (type INTEGER) (default -1))	; -1 signifies not yet counted
+	(slot preflop_bet_size (type FLOAT) (default -1.0))	; -1.0 signifies not yet calculated
+	(slot postflop_bet_size (type FLOAT) (default -1.0)))	; -1.0 signifies not yet calculated
 
 ; ; Self template
 (deftemplate MAIN::self
@@ -166,7 +172,7 @@
 ; ; The initial facts
 (deffacts MAIN::the-facts
 	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEFOLDS_STRATEGY*))
-	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move check))
+	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move nil))
 	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
@@ -400,6 +406,37 @@
 	=>
 	(assert (can_raise)))
 	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Preprocessing stuff for bet-sizing;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+; ; Initialize bet_sizing_help fact
+(defrule POSSIBLE-MOVE-DETERMINATION::initialize-bet-sizing-help-fact
+	(not (bet_sizing_help))
+	=>
+	(assert (bet_sizing_help)))
+	
+; ; Count the number of limpers in this round
+(defrule POSSIBLE-MOVE-DETERMINATION::count-limpers
+	?bsh <- (bet_sizing_help (limpers -1))	; ; not yet processed
+	=>
+	(bind ?limper_count
+		(length$ (find-all-facts ((?p player)) (or (eq ?p:move ?*CALL*) (eq ?p:move ?*CHECK*)))))
+	(modify ?bsh (limpers ?limper_count)))
+	
+; ; Calculate preflop bet size
+(defrule POSSIBLE-MOVE-DETERMINATION::calculate-preflop-bet-size
+	?bsh <- (bet_sizing_help (limpers ?limpers&:(>= ?limpers 0)) (preflop_bet_size -1.0))		; ; limpers calculated but not preflop bet size
+	(game (min_allowed_bet ?minbet))
+	=>
+	(modify ?bsh (preflop_bet_size (+ (* 3 ?minbet) (* ?limpers ?minbet)))))
+
+; ; Calculate posflop bet size
+(defrule POSSIBLE-MOVE-DETERMINATION::calculate-postflop-bet-size
+	?bsh <- (bet_sizing_help (postflop_bet_size -1.0))	; ; postflop bet size not calculated
+	(game (pot ?pot))
+	=>
+	(modify ?bsh (postflop_bet_size (* 0.75 ?pot))))
 	
 
 	
@@ -557,29 +594,49 @@
 	(not (move))							; ; Have not made a move
 	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)) (money ?mymoney))
 	(can_bet)
-	(game (min_allowed_bet ?minbet))
+	(game (min_allowed_bet ?minbet) (pot ?pot) (round ?round))
+	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
-	(bind ?high_amount (* 0.3 ?mymoney))	; ; 30% of my money
-	(if (> ?high_amount ?minbet)
+	(if (> ?round 0)	; ; Post-flop
 		then
-		(assert (move (move_type ?*BET*) (current_bet ?high_amount)))
-		(modify ?self (bet ?high_amount))
+		(bind ?high_amount ?postflop_bet_size)
 		else
-		(assert (move (move_type ?*BET*) (current_bet ?minbet)))
-		(modify ?self (bet ?minbet))))
+		(bind ?high_amount ?preflop_bet_size))
+	(if (>= ?high_amount ?mymoney)		; ; All-in if not enough money
+		then
+		(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
+		(modify ?self (bet ?mymoney))
+		else 
+		(if (>= ?high_amount ?minbet)	; ; If enough money and amount is more than min bet, bet it, otherwise less than min bet so bet min bet
+			then
+			(assert (move (move_type ?*BET*) (current_bet ?high_amount)))
+			(modify ?self (bet ?high_amount))
+			else
+			(assert (move (move_type ?*BET*) (current_bet ?minbet)))
+			(modify ?self (bet ?minbet)))))
 ; ; When unable to bet but able to raise, perform a big raise to induce fold
 (defrule MOVE-SELECTION::induce-folds-strategy-big-raise
 	(not (move))							; ; Have not made a move
 	?self <- (self (strategy ?strat&:(eq ?strat ?*INDUCEFOLDS_STRATEGY*)) (money ?mymoney))
 	(can_raise)
 	(not (can_bet))
-	(game (current_bet ?current_bet) (min_allowed_bet ?minbet))
+	(game (current_bet ?current_bet) (min_allowed_bet ?minbet) (pot ?pot) (round ?round))
+	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
-	(bind ?high_amount (* 0.3 ?mymoney))	; ; 30% of my money
-	(bind ?raise_amount (max (- ?high_amount ?current_bet) ?minbet))
+	(if (> ?round 0)	; ; Post-flop
+		then
+		(bind ?raise_amount ?postflop_bet_size)
+		else
+		(bind ?raise_amount ?preflop_bet_size))
+	(bind ?raise_amount (max ?raise_amount ?minbet))	; ; Ensure that the raise_amount is at least minimum bet
 	(bind ?new_bet (+ ?current_bet ?raise_amount))
-	(assert (move (move_type ?*RAISE*) (current_bet ?new_bet)))
-	(modify ?self (bet ?new_bet)))
+	(if (>= ?new_bet ?mymoney)
+		then
+		(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
+		(modify ?self (bet ?mymoney))
+		else
+		(assert (move (move_type ?*RAISE*) (current_bet ?new_bet)))
+		(modify ?self (bet ?new_bet))))
 ; ; When unable to bet AND unable to raise, perform all in
 (defrule MOVE-SELECTION::induce-folds-strategy-all-in
 	(not (move))							; ; Have not made a move
@@ -680,6 +737,4 @@
 		then
 		(printout t " $" ?current_bet))
 	(printout t crlf))
-	
-
 	
