@@ -76,18 +76,20 @@
 	(slot name (type STRING) (default "me"))						; name MIGHT NOT be unique
 	(slot money (type FLOAT) (default 0.0))							; money that I have to play, including the bet I have made
 	(slot bet (type FLOAT) (default 0.0))							; the bet that I have made at the moment (which must be forfeited when folding)
+	(slot position (type INTEGER) (default 0))						; Position in the round of betting (should be unique)
 	(slot strategy (type SYMBOL) (default ?*DEFENSIVE_STRATEGY*)))	; the strategy being adopted by myself
 
 	
 ; ; Player template (players other than myself)
 (deftemplate MAIN::player
-	(slot player_id (type INTEGER) (default 0)) 		; player id that should be unique
-	(slot name (type STRING) (default "nameless"))		; name MIGHT NOT be unique
-	(slot money (type FLOAT) (default 0.0))				; money that the player has to play, excluding the bet they have made
-	(slot bet (type FLOAT) (default 0.0))				; the bet that the player has made at the moment
+	(slot player_id (type INTEGER) (default 0)) 			; player id that should be unique
+	(slot name (type STRING) (default "nameless"))			; name MIGHT NOT be unique
+	(slot money (type FLOAT) (default 0.0))					; money that the player has to play, excluding the bet they have made
+	(slot bet (type FLOAT) (default 0.0))					; the bet that the player has made at the moment
 	(slot tight_loose (type SYMBOL) (default nil))			; is the player tight or loose with starting hand selection?
 	(slot aggressive_passive (type SYMBOL) (default nil))	; is the player aggressive or passive?
-	(slot move (type SYMBOL)))							; the move that was taken by the player
+	(slot position (type INTEGER) (default 0))				; Position in the round of betting (should be unique)
+	(slot move (type SYMBOL)))								; the move that was taken by the player
 
 	
 ; ; Players' move count template (for determining their playing styles)
@@ -163,9 +165,9 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (strategy ?*INDUCEFOLDS_STRATEGY*))
-	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (move check))
-	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (move check))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move check))
+	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
 	
