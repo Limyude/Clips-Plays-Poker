@@ -39,13 +39,57 @@
 (defglobal ?*LOCATION_HOLE* = hole)		; ; Hole cards are the face-down cards (in your hand)
 (defglobal ?*LOCATION_BOARD* = board)	; ; Board cards are the face-up cards
 
-; ; POSITION CONSTANTS (for use when selecting strategy)
+; ; POSITION TYPE CONSTANTS (for use when selecting strategy)
 (defglobal ?*POSITION_EARLY* = early)
 (defglobal ?*POSITION_MID* = mid)
 (defglobal ?*POSITION_LATE* = late)
 (defglobal ?*POSITION_SMALLBLIND* = small_blind)
 (defglobal ?*POSITION_BIGBLIND* = big_blind)
 
+; ; HAND TYPE CONSTANTS
+(defglobal ?*HAND_AA* = AA)
+(defglobal ?*HAND_QQ* = KK)
+(defglobal ?*HAND_KK* = QQ)
+
+(defglobal ?*HAND_JJ* = JJ)
+(defglobal ?*HAND_TT* = TT)
+
+(defglobal ?*HAND_99-22* = 99-22)
+
+(defglobal ?*HAND_AKs* = AKs)
+(defglobal ?*HAND_AKo* = AKo)
+
+(defglobal ?*HAND_AQs* = AQs)
+(defglobal ?*HAND_AQo* = AQo)
+(defglobal ?*HAND_AJs* = AJs)
+
+(defglobal ?*HAND_AJo* = AJo)
+(defglobal ?*HAND_ATs* = ATs)
+(defglobal ?*HAND_ATo* = ATo)
+
+(defglobal ?*HAND_A9s-A2s* = A9s-A2s)
+
+(defglobal ?*HAND_KQs* = KQs)
+(defglobal ?*HAND_KQo* = KQo)
+(defglobal ?*HAND_KJs* = KJs)
+(defglobal ?*HAND_KJo* = KJo)
+(defglobal ?*HAND_QJs* = QJs)
+
+(defglobal ?*HAND_KTs* = KTs)
+(defglobal ?*HAND_KTo* = KTo)
+(defglobal ?*HAND_QJo* = QJo)
+(defglobal ?*HAND_QTs* = QTs)
+(defglobal ?*HAND_Q9s* = Q9s)
+(defglobal ?*HAND_JTs* = JTs)
+(defglobal ?*HAND_J9s* = J9s)
+(defglobal ?*HAND_J8s* = J8s)
+(defglobal ?*HAND_T9s* = T9s)
+(defglobal ?*HAND_T8s* = T8s)
+(defglobal ?*HAND_98s* = 98s)
+(defglobal ?*HAND_87s* = 87s)
+(defglobal ?*HAND_76s* = 76s)
+(defglobal ?*HAND_65s* = 65s)
+(defglobal ?*HAND_54s* = 54s)
 
 ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ;
@@ -100,6 +144,7 @@
 	(slot bet (type FLOAT) (default 0.0))							; the bet that I have made at the moment (which must be forfeited when folding)
 	(slot position (type INTEGER) (default 0))						; Position in the round of betting (should be unique)
 	(slot position_type (type SYMBOL))								; Position type (early/mid/late/sb/bb)
+	(slot hand_type (type SYMBOL))									; Hand type (AA, KK, QQ, AKs, AKo, etc.)
 	(slot strategy (type SYMBOL) (default ?*DEFENSIVE_STRATEGY*)))	; the strategy being adopted by myself
 
 	
@@ -670,8 +715,12 @@
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
 	
-	
-	
+
+; ; ; ; ; ; ; ; ; ; ; ;
+; ; Select strategies ;
+; ; ; ; ; ; ; ; ; ; ; ;
+
+
 	
 	
 	
