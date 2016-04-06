@@ -91,6 +91,8 @@
 (defglobal ?*HAND_65s* = 65s)
 (defglobal ?*HAND_54s* = 54s)
 
+(defglobal ?*HAND_BADHAND* = bad_hand)
+
 ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ;
@@ -233,6 +235,8 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
+	(card (suit a) (value 2) (location ?*LOCATION_HOLE*))
+	(card (suit b) (value 2) (location ?*LOCATION_HOLE*))
 	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEBETS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move nil))
 	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
@@ -399,8 +403,83 @@
 	
 	
 	
-
 	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; OWN-HAND-DETERMINATION MODULE ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+; ; ; ; ; ; ;
+; ; ; ; ; ; ;
+; ; Pairs ; ;
+; ; ; ; ; ; ;
+; ; ; ; ; ; ;
+
+(defrule OWN-HAND-DETERMINATION::determine-handtype-AA
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value 14) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value 14) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_AA*))
+	(printout t "Hand is: AA" crlf))
+(defrule OWN-HAND-DETERMINATION::determine-handtype-KK
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value 13) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value 13) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_KK*))
+	(printout t "Hand is: KK" crlf))	
+(defrule OWN-HAND-DETERMINATION::determine-handtype-QQ
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value 12) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value 12) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_QQ*))
+	(printout t "Hand is: QQ" crlf))
+(defrule OWN-HAND-DETERMINATION::determine-handtype-JJ
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value 11) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value 11) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_JJ*))
+	(printout t "Hand is: JJ" crlf))
+(defrule OWN-HAND-DETERMINATION::determine-handtype-TT
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value 10) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value 10) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_TT*))
+	(printout t "Hand is: TT" crlf))
+(defrule OWN-HAND-DETERMINATION::determine-handtype-99-22
+	?self <- (self (hand_type nil))							; ; Determine hand type only once
+	?card1 <- (card (value ?v1&:(and (<= ?v1 9) (>= ?v1 2))) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	?card2 <- (card (value ?v2&:(= ?v1 ?v2)) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(test (neq ?card1 ?card2))
+	=>
+	(modify ?self (hand_type ?*HAND_99-22*))
+	(printout t "Hand is: 99-22" crlf))
+	
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Set hand type to a bad hand if no other rule set it ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule OWN-HAND-DETERMINATION::determine-handtype-badhand
+	(declare (salience -1))			; ; Least salient (since it is a default fail-safe value)
+	?self <- (self (hand_type nil))
+	=>
+	(modify ?self (hand_type ?*HAND_BADHAND*))
+	(printout t "Hand is: bad_hand" crlf))
 	
 	
 	
