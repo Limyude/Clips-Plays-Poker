@@ -82,7 +82,7 @@
 	(bind ?limper_count
 		(length$ (find-all-facts ((?p player)) (or (eq ?p:move ?*CALL*) (eq ?p:move ?*CHECK*)))))
 	(modify ?bsh (limpers ?limper_count))
-	(printout t "Number of limpers: " ?limper_count crlf))
+	(printout t "Counted number of limpers: " ?limper_count crlf))
 	
 ; ; Calculate preflop bet size
 (defrule POSSIBLE-MOVE-DETERMINATION::calculate-preflop-bet-size

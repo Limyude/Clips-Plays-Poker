@@ -17,7 +17,7 @@
 (defglobal ?*CUTLOSSES_STRATEGY* = cut-losses)						; moves to take: check/fold (like when the villain obviously has a monster hand)
 (defglobal ?*DEFENSIVE_STRATEGY* = defensive)						; moves to take: small bet/check/fold if necessary (like when playing against a possibly strong marginal/monster hand with a marginal hand)
 (defglobal ?*INDUCEFOLDS_STRATEGY* = induce-folds)					; moves to take: bluff (like when playing against a possibly weak marginal hand with an air hand)
-(defglobal ?*INDUCEBETS_STRATEGY* = induce-bets)					; moves to take: small bet/check (like when against an air hand)
+(defglobal ?*INDUCEBETS_STRATEGY* = induce-bets)					; moves to take: value bet/check (like when against an air hand)
 
 ; ; TYPE OF HAND CONSTANTS
 (defglobal ?*AIR_HAND* = air-hand)

@@ -8,7 +8,32 @@
 
 (defrule STRATEGY-SELECTION::count-players
 	=>
-	(assert (num_players (+ (length$ (find-all-facts ((?p player)) TRUE)) (length$ (find-all-facts ((?s self)) TRUE))))))
+	(bind ?num_players (+ (length$ (find-all-facts ((?p player)) TRUE)) (length$ (find-all-facts ((?s self)) TRUE))))
+	(assert (num_players ?num_players))
+	(printout t "Counted number of players: " ?num_players crlf))
+	
+(defrule STRATEGY-SELECTION::count-raisers
+	=>
+	(bind ?num_raisers (length$ (find-all-facts ((?p player)) (eq ?p:move ?*RAISE*))))
+	(assert (num_raisers ?num_raisers))
+	(printout t "Counted number of raisers: " ?num_raisers crlf))
+	
+(defrule STRATEGY-SELECTION::count-callers
+	=>
+	(bind ?num_callers (length$ (find-all-facts ((?p player)) (eq ?p:move ?*CALL*))))
+	(assert (num_callers ?num_callers))
+	(printout t "Counted number of callers: " ?num_callers crlf))
+	
+; ; Consider stacks to be deep if more than half the players (other than myself) have more than or equal to 20 times the min bet
+(defrule STRATEGY-SELECTION::check-if-stacks-are-deep
+	(num_players ?np)
+	(game (min_allowed_bet ?minbet))
+	(test 	(> 	(length$ (find-all-facts ((?p player)) 		; ; Number of players (other than self) who has more than 20 times the min bet
+										(>= ?p:money (* ?minbet 20.0)))) 
+				(div (- ?np 1) 2)))	; ; Half of the players (other than myself)
+	=>
+	(assert (stacks_are_deep))
+	(printout t "Found that: stacks_are_deep!" crlf))
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
@@ -311,5 +336,136 @@
 	
 
 ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Select strategies ;
 ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ;
+
+
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Pre-flop starting hand selection;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+; ; AA, KK, QQ: raise always
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AAKKQQ
+	(game (round 0))
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(or 
+							(eq ?ht ?*HAND_AA*) 
+							(eq ?ht ?*HAND_KK*)
+							(eq ?ht ?*HAND_QQ*))))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+
+; ; JJ, TT: raise if no raisers, call if stacks are deep and there are raisers
+(defrule STRATEGY-SELECTION::select-strategy-preflop-JJTT-noraisers
+	(game (round 0))
+	(num_raisers 0)
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_JJ*)
+							(eq ?ht ?*HAND_TT*))))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-JJTT-haveraisers
+	(game (round 0) (current_bet ?current_bet))
+	(num_raisers ?nr&:(>= ?nr 1))
+	(stacks_are_deep)
+	(not (move))
+	(can_call)
+	?self <- (self	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_JJ*)
+							(eq ?ht ?*HAND_TT*))))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))		; ; Select move immediately, because this call might not be done in the defensive strategy
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+	
+; ; 99-22: 	More than 1 raiser, cut losses;
+; ;			1 raiser & stacks are deep, call and go defensive
+; ;			No raisers & there are callers before me, call and go defensive
+; ;			No raisers & no callers before me & early/mid position, fold
+; ;			No raisers & no callers before me & late/sb, raise
+(defrule STRATEGY-SELECTION::select-strategy-preflop-99-22-morethan1raiser
+	(game (round 0))
+	(num_raisers ?nr&:(> ?nr 1))
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(eq ?ht ?*HAND_99-22*)))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-99-22-1raiser-and-stacks-are-deep
+	(game (round 0) (current_bet ?current_bet))
+	(num_raisers 1)
+	(stacks_are_deep)
+	(not (move))
+	(can_call)
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(eq ?ht ?*HAND_99-22*)))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-99-22-noraisers-and-havecallers-before-me
+	(game (round 0) (current_bet ?current_bet))
+	(num_raisers 0)
+	(num_callers ?nc&:(>= ?nc 1))
+	(not (move))
+	(can_call)
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(eq ?ht ?*HAND_99-22*)))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-99-22-noraisers-nocallers-earlymid
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(eq ?ht ?*HAND_99-22*))
+					(position_type ?pt&:(or
+						(eq ?pt ?*POSITION_EARLY*)
+						(eq ?pt ?*POSITION_MID*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-99-22-noraisers-nocallers-latesbbb
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil)		; ; Select strategy once only
+					(hand_type ?ht&:(eq ?ht ?*HAND_99-22*))
+					(position_type ?pt&:(or
+						(eq ?pt ?*POSITION_LATE*)
+						(eq ?pt ?*POSITION_SMALLBLIND*)
+						(eq ?pt ?*POSITION_BIGBLIND*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; Set strategy to defaults;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+
+; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
+(defrule STRATEGY-SELECTION::select-strategy-preflop-default
+	(declare (salience -10))			; ; Only set default if no other rule set it
+	(game (round 0))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+
+; ; If postflop but have no strategy chosen, pick defensive
+(defrule STRATEGY-SELECTION::select-strategy-postflop-default
+	(declare (salience -10))			; ; Only set default if no other rule set it
+	(game (round ?r&:(>= ?r 1)))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+	
+; ; Print out the strategy we are using to select a move
+(defrule STRATEGY-SELECTION::print-strategy-used
+	(declare (salience -1))
+	(not (printed_strategy))
+	(self (strategy ?strat&~nil))
+	=>
+	(assert (printed_strategy))
+	(printout t "My strategy: " ?strat crlf))

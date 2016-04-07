@@ -272,15 +272,6 @@
 ; ; Utility rules ;
 ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; 
-	
-; ; Print out the strategy we are using to select a move
-(defrule MOVE-SELECTION::print-strategy-used
-	(declare (salience 1))
-	(not (printed_strategy))
-	(self (strategy ?strat))
-	=>
-	(assert (printed_strategy))
-	(printout t "My strategy: " ?strat crlf))
 
 	
 ; ; Print out the move selected

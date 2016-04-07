@@ -24,6 +24,7 @@
 ; ; 4) bet xx.xx (the amount betted)
 ; ; 5) raise xx.xx (the amount raised to)
 ; ; 6) all-in xx.xx (amount all-ed in)
+
 (deftemplate MAIN::move
 	(slot move_type (type SYMBOL) (default ?DERIVE))
 	(slot current_bet (type FLOAT) (default 0.0)))
@@ -143,11 +144,12 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(card (suit a) (value 11) (location ?*LOCATION_HOLE*))
-	(card (suit b) (value 11) (location ?*LOCATION_HOLE*))
-	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move raise))
-	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 1)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
-	(player (player_id 1) (name "Bad Guy 2") (money 13.37) (bet 0.0) (position 2) (move nil))
-	(player (player_id 3) (name "Bad Guy 3") (money 40.0) (bet 0.0) (position 3) (move nil))
+	(card (suit a) (value 9) (location ?*LOCATION_HOLE*))
+	(card (suit b) (value 9) (location ?*LOCATION_HOLE*))
+	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 0.0) (position 0) (move fold))
+	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
+	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 2)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(player (player_id 1) (name "Bad Guy 2") (money 13.37) (bet 0.0) (position 3) (move nil))
+	(player (player_id 3) (name "Bad Guy 3") (money 40.0) (bet 0.0) (position 4) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 0) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0)))
+	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
