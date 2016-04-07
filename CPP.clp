@@ -150,29 +150,3 @@
 	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
 	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
-	
-	
-	
-	
-
-	
-	
-	
-	
-	
-
-	
-	
-	
-
-
-
-	
-	
-	
-
-	
-
-	
-
-	
