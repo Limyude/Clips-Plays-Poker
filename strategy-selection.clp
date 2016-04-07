@@ -530,6 +530,83 @@
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
 	
+; ; AJo, ATs, ATo: 	Have raisers, cut losses (fold)
+; ;					No raisers, have callers, early/mid position, cut losses (fold)
+; ;					No raisers, have callers, late/sb/bb position, call and go defensive
+; ;					No raisers, no callers, early/mid position, cut losses (fold)
+; ;					No raisers, no callers, late/sb/bb position, induce folds (raise)
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AJoATsATo-haveraisers
+	(game (round 0))
+	(num_raisers ?nr&:(>= ?nr 1))
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AJo*)
+							(eq ?ht ?*HAND_ATs*)
+							(eq ?ht ?*HAND_ATo*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AJoATsATo-noraisers-havecallers-earlymid
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers ?nc&:(>= ?nc 1))
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AJo*)
+							(eq ?ht ?*HAND_ATs*)
+							(eq ?ht ?*HAND_ATo*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_EARLY*)
+										(eq ?pt ?*POSITION_MID*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AJoATsATo-noraisers-havecallers-latesbbb
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers ?nc&:(>= ?nc 1))
+	(no (move))
+	(can_call)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AJo*)
+							(eq ?ht ?*HAND_ATs*)
+							(eq ?ht ?*HAND_ATo*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_LATE*)
+										(eq ?pt ?*POSITION_SMALLBLIND*)
+										(eq ?pt ?*POSITION_BIGBLIND*))))
+	=>
+	(assert (move (move_type ?*CALL*)))
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AJoATsATo-noraisers-nocallers-earlymid
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AJo*)
+							(eq ?ht ?*HAND_ATs*)
+							(eq ?ht ?*HAND_ATo*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_EARLY*)
+										(eq ?pt ?*POSITION_MID*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-AJoATsATo-noraisers-nocallers-latesbbb
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AJo*)
+							(eq ?ht ?*HAND_ATs*)
+							(eq ?ht ?*HAND_ATo*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_LATE*)
+										(eq ?pt ?*POSITION_SMALLBLIND*)
+										(eq ?pt ?*POSITION_BIGBLIND*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; Set strategy to defaults;

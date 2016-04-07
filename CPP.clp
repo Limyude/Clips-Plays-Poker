@@ -145,7 +145,7 @@
 ; ; The initial facts
 (deffacts MAIN::the-facts
 	(card (suit a) (value 14) (location ?*LOCATION_HOLE*))
-	(card (suit a) (value 12) (location ?*LOCATION_HOLE*))
+	(card (suit b) (value 11) (location ?*LOCATION_HOLE*))
 	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
 	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
 	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
