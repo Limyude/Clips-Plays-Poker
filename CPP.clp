@@ -237,7 +237,7 @@
 (deffacts MAIN::the-facts
 	(card (suit a) (value 5) (location ?*LOCATION_HOLE*))
 	(card (suit a) (value 4) (location ?*LOCATION_HOLE*))
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEBETS_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEFOLDS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move nil))
 	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
@@ -1104,7 +1104,8 @@
 	=>
 	(bind ?limper_count
 		(length$ (find-all-facts ((?p player)) (or (eq ?p:move ?*CALL*) (eq ?p:move ?*CHECK*)))))
-	(modify ?bsh (limpers ?limper_count)))
+	(modify ?bsh (limpers ?limper_count))
+	(printout t "Number of limpers: " ?limper_count crlf))
 	
 ; ; Calculate preflop bet size
 (defrule POSSIBLE-MOVE-DETERMINATION::calculate-preflop-bet-size
@@ -1279,23 +1280,14 @@
 	(game (min_allowed_bet ?minbet) (pot ?pot) (round ?round))
 	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
-	(if (> ?round 0)	; ; Post-flop
-		then
-		(bind ?high_amount ?postflop_bet_size)
-		else
-		(bind ?high_amount ?preflop_bet_size))
-	(if (>= ?high_amount ?mymoney)		; ; All-in if not enough money
+	(bind ?high_amount (max ?preflop_bet_size ?postflop_bet_size ?minbet))
+	(if (>= ?high_amount ?mymoney)		; ; Not enough money, all-in!
 		then
 		(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 		(modify ?self (bet ?mymoney))
-		else 
-		(if (>= ?high_amount ?minbet)	; ; If enough money and amount is more than min bet, bet it, otherwise less than min bet so bet min bet
-			then
-			(assert (move (move_type ?*BET*) (current_bet ?high_amount)))
-			(modify ?self (bet ?high_amount))
-			else
-			(assert (move (move_type ?*BET*) (current_bet ?minbet)))
-			(modify ?self (bet ?minbet)))))
+		else 							; ; Enough money, so place the bet
+		(assert (move (move_type ?*BET*) (current_bet ?high_amount)))
+		(modify ?self (bet ?high_amount))))
 ; ; When unable to bet but able to raise, perform a big raise to induce fold
 (defrule MOVE-SELECTION::induce-folds-strategy-big-raise
 	(not (move))							; ; Have not made a move
@@ -1305,12 +1297,7 @@
 	(game (current_bet ?current_bet) (min_allowed_bet ?minbet) (pot ?pot) (round ?round))
 	(bet_sizing_help (preflop_bet_size ?preflop_bet_size) (postflop_bet_size ?postflop_bet_size))
 	=>
-	(if (> ?round 0)	; ; Post-flop
-		then
-		(bind ?raise_amount ?postflop_bet_size)
-		else
-		(bind ?raise_amount ?preflop_bet_size))
-	(bind ?raise_amount (max ?raise_amount ?minbet))	; ; Ensure that the raise_amount is at least minimum bet
+	(bind ?raise_amount (max ?preflop_bet_size ?postflop_bet_size ?minbet))
 	(bind ?new_bet (+ ?current_bet ?raise_amount))
 	(if (>= ?new_bet ?mymoney)
 		then
