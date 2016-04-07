@@ -145,14 +145,14 @@
 ; ; The initial facts
 (deffacts MAIN::the-facts
 	(card (suit a) (value 14) (location ?*LOCATION_HOLE*))
-	(card (suit b) (value 11) (location ?*LOCATION_HOLE*))
+	(card (suit a) (value 9) (location ?*LOCATION_HOLE*))
 	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
-	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
+	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move call))
 	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
-	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 6)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 4") (money 13.37) (bet 0.0) (position 4) (move nil))
 	(player (player_id 3) (name "Bad Guy 5") (money 40.0) (bet 0.0) (position 5) (move nil))
-	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 6) (move nil))
+	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 3) (move nil))
 	(player (player_id 7) (name "Bad Guy 7") (money 13.37) (bet 0.0) (position 7) (move nil))
 	(player (player_id 8) (name "Bad Guy 8") (money 40.0) (bet 0.0) (position 8) (move nil))
 	(player (player_id 9) (name "Bad Guy 9") (money 40.0) (bet 0.0) (position 9) (move nil))
