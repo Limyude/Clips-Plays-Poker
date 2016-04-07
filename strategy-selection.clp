@@ -749,6 +749,115 @@
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
 	
+; ; KTs, KTo,
+; ; QJo, QTs,
+; ; Q9s, JTs,
+; ; J9s, J8s,
+; ; T9s, T8s,
+; ; 98s, 87s,
+; ; 76s, 65s,
+; ; 54s:	Have raisers, cut losses (fold)
+; ;			No raisers, have callers, early/mid position, cut losses (fold)
+; ;			No raisers, have callers, late/sb/bb position, call and go defensive
+; ;			No raisers, no callers, early/mid position, cut losses (fold)
+; ;			No raisers, no callers, late/sb/bb position, induce folds (raise)
+(defrule STRATEGY-SELECTION::select-strategy-preflop-lousyothers-haveraisers
+	(game (round 0))
+	(num_raisers ?nr&:(>= ?nr 1))
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+									(eq ?ht ?*HAND_KTs*) (eq ?ht ?*HAND_KTo*)
+									(eq ?ht ?*HAND_QJo*) (eq ?ht ?*HAND_QTs*)
+									(eq ?ht ?*HAND_Q9s*) (eq ?ht ?*HAND_JTs*)
+									(eq ?ht ?*HAND_J9s*) (eq ?ht ?*HAND_J8s*)
+									(eq ?ht ?*HAND_T9s*) (eq ?ht ?*HAND_T8s*)
+									(eq ?ht ?*HAND_98s*) (eq ?ht ?*HAND_87s*)
+									(eq ?ht ?*HAND_76s*) (eq ?ht ?*HAND_65s*)
+									(eq ?ht ?*HAND_54s*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-lousyothers-noraisers-havecallers-earlymid
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers ?nc&:(>= ?nc 1))
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+									(eq ?ht ?*HAND_KTs*) (eq ?ht ?*HAND_KTo*)
+									(eq ?ht ?*HAND_QJo*) (eq ?ht ?*HAND_QTs*)
+									(eq ?ht ?*HAND_Q9s*) (eq ?ht ?*HAND_JTs*)
+									(eq ?ht ?*HAND_J9s*) (eq ?ht ?*HAND_J8s*)
+									(eq ?ht ?*HAND_T9s*) (eq ?ht ?*HAND_T8s*)
+									(eq ?ht ?*HAND_98s*) (eq ?ht ?*HAND_87s*)
+									(eq ?ht ?*HAND_76s*) (eq ?ht ?*HAND_65s*)
+									(eq ?ht ?*HAND_54s*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_EARLY*)
+										(eq ?pt ?*POSITION_MID*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-lousyothers-noraisers-havecallers-latesbbb
+	(game (round 0) (current_bet ?current_bet))
+	(num_raisers 0)
+	(num_callers ?nc&:(>= ?nc 1))
+	(not (move))
+	(can_call)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+									(eq ?ht ?*HAND_KTs*) (eq ?ht ?*HAND_KTo*)
+									(eq ?ht ?*HAND_QJo*) (eq ?ht ?*HAND_QTs*)
+									(eq ?ht ?*HAND_Q9s*) (eq ?ht ?*HAND_JTs*)
+									(eq ?ht ?*HAND_J9s*) (eq ?ht ?*HAND_J8s*)
+									(eq ?ht ?*HAND_T9s*) (eq ?ht ?*HAND_T8s*)
+									(eq ?ht ?*HAND_98s*) (eq ?ht ?*HAND_87s*)
+									(eq ?ht ?*HAND_76s*) (eq ?ht ?*HAND_65s*)
+									(eq ?ht ?*HAND_54s*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_LATE*)
+										(eq ?pt ?*POSITION_SMALLBLIND*)
+										(eq ?pt ?*POSITION_BIGBLIND*))))
+	=>
+	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-lousyothers-noraisers-nocallers-earlymid
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+									(eq ?ht ?*HAND_KTs*) (eq ?ht ?*HAND_KTo*)
+									(eq ?ht ?*HAND_QJo*) (eq ?ht ?*HAND_QTs*)
+									(eq ?ht ?*HAND_Q9s*) (eq ?ht ?*HAND_JTs*)
+									(eq ?ht ?*HAND_J9s*) (eq ?ht ?*HAND_J8s*)
+									(eq ?ht ?*HAND_T9s*) (eq ?ht ?*HAND_T8s*)
+									(eq ?ht ?*HAND_98s*) (eq ?ht ?*HAND_87s*)
+									(eq ?ht ?*HAND_76s*) (eq ?ht ?*HAND_65s*)
+									(eq ?ht ?*HAND_54s*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_EARLY*)
+										(eq ?pt ?*POSITION_MID*))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-preflop-A9s-A2s-noraisers-nocallers-latesbbb
+	(game (round 0))
+	(num_raisers 0)
+	(num_callers 0)
+	?self <- (self 	(strategy nil) 		; ; Select strategy once only
+					(hand_type ?ht&:(or
+									(eq ?ht ?*HAND_KTs*) (eq ?ht ?*HAND_KTo*)
+									(eq ?ht ?*HAND_QJo*) (eq ?ht ?*HAND_QTs*)
+									(eq ?ht ?*HAND_Q9s*) (eq ?ht ?*HAND_JTs*)
+									(eq ?ht ?*HAND_J9s*) (eq ?ht ?*HAND_J8s*)
+									(eq ?ht ?*HAND_T9s*) (eq ?ht ?*HAND_T8s*)
+									(eq ?ht ?*HAND_98s*) (eq ?ht ?*HAND_87s*)
+									(eq ?ht ?*HAND_76s*) (eq ?ht ?*HAND_65s*)
+									(eq ?ht ?*HAND_54s*)))
+					(position_type ?pt&:(or
+										(eq ?pt ?*POSITION_LATE*)
+										(eq ?pt ?*POSITION_SMALLBLIND*)
+										(eq ?pt ?*POSITION_BIGBLIND*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; Set strategy to defaults;
