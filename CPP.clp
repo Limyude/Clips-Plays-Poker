@@ -48,14 +48,14 @@
 
 ; ; Self template
 (deftemplate MAIN::self
-	(slot player_id (type INTEGER) (default 0))						; player id that should be unique
-	(slot name (type STRING) (default "me"))						; name MIGHT NOT be unique
-	(slot money (type FLOAT) (default 0.0))							; money that I have to play, including the bet I have made
-	(slot bet (type FLOAT) (default 0.0))							; the bet that I have made at the moment (which must be forfeited when folding)
-	(slot position (type INTEGER) (default 0))						; Position in the round of betting (should be unique)
-	(slot position_type (type SYMBOL))								; Position type (early/mid/late/sb/bb)
-	(slot hand_type (type SYMBOL))									; Hand type (AA, KK, QQ, AKs, AKo, etc.)
-	(slot strategy (type SYMBOL) (default ?*DEFENSIVE_STRATEGY*)))	; the strategy being adopted by myself
+	(slot player_id (type INTEGER) (default 0))			; player id that should be unique
+	(slot name (type STRING) (default "me"))			; name MIGHT NOT be unique
+	(slot money (type FLOAT) (default 0.0))				; money that I have to play, including the bet I have made
+	(slot bet (type FLOAT) (default 0.0))				; the bet that I have made at the moment (which must be forfeited when folding)
+	(slot position (type INTEGER) (default 0))			; Position in the round of betting (should be unique)
+	(slot position_type (type SYMBOL))					; Position type (early/mid/late/sb/bb)
+	(slot hand_type (type SYMBOL))						; Hand type (AA, KK, QQ, AKs, AKo, etc.)
+	(slot strategy (type SYMBOL)))						; the strategy being adopted by myself
 
 	
 ; ; Player template (players other than myself)
@@ -125,8 +125,8 @@
 		OPPONENT-HAND-DETERMINATION 
 		OWN-HAND-DETERMINATION 
 		STRONGEST-OPPONENT-DETERMINATION 
-		STRATEGY-SELECTION 
 		POSSIBLE-MOVE-DETERMINATION 
+		STRATEGY-SELECTION 
 		MOVE-SELECTION))
 
 	
@@ -135,7 +135,7 @@
 	(declare (salience -1))		; ; Changing focus is least important
 	?list <- (module-sequence ?next-module $?other-modules)
 	=>
-	(printout t "In module " ?next-module " now" crlf)
+	(printout t crlf "In module " ?next-module " now" crlf)
 	(focus ?next-module)
 	(retract ?list)
 	(assert (module-sequence $?other-modules)))
@@ -143,10 +143,11 @@
 	
 ; ; The initial facts
 (deffacts MAIN::the-facts
-	(card (suit a) (value 5) (location ?*LOCATION_HOLE*))
-	(card (suit a) (value 4) (location ?*LOCATION_HOLE*))
-	(self (player_id 0) (name "The Bot") (money 13.37) (bet 0.0) (position 1) (strategy ?*INDUCEFOLDS_STRATEGY*))
-	(player (player_id 1) (name "Bad Guy 1") (money 13.36) (bet 0.0) (position 2) (move nil))
-	(player (player_id 2) (name "Bad Guy 2") (money 13.35) (bet 0.0) (position 0) (move check))
+	(card (suit a) (value 11) (location ?*LOCATION_HOLE*))
+	(card (suit b) (value 11) (location ?*LOCATION_HOLE*))
+	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move raise))
+	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 1)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(player (player_id 1) (name "Bad Guy 2") (money 13.37) (bet 0.0) (position 2) (move nil))
+	(player (player_id 3) (name "Bad Guy 3") (money 40.0) (bet 0.0) (position 3) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 0) (pot 0.0) (current_bet 0.0) (min_allowed_bet 1.0)))
+	(game (round 0) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0)))
