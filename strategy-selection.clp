@@ -335,7 +335,7 @@
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
 	
 ; ; Default position (in case it is not a 3-10 player game)
-(defrule STRATEGY-SELECTION:: determine-position-type-default
+(defrule STRATEGY-SELECTION::determine-position-type-default
 	(declare (salience -1))
 	?self <- (self (position_type nil))
 	=>
@@ -895,3 +895,59 @@
 	=>
 	(assert (printed_strategy))
 	(printout t "My strategy: " ?strat crlf))
+	
+	
+	
+	
+
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Read the file to 'remember' what    ;
+; ; strategy we were using              ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::load-strategy-from-file
+	(declare (salience 1))		; ; Loading the previous strategy from the file should be done first
+	=>
+	(if (eq (open ?*PREVIOUS_STRATEGY_FILENAME* rf) FALSE)
+		then
+		(open ?*PREVIOUS_STRATEGY_FILENAME* wf "w")
+		(printout wf "")
+		(close wf)
+		(open ?*PREVIOUS_STRATEGY_FILENAME* rf))
+	(while (neq (bind ?line (readline rf)) EOF)
+		(assert-string ?line))
+	(close rf))
+	
+(defrule STRATEGY-SELECTION::set-current-strategy-to-previous-strategy
+	(declare (salience 1))
+	(game (round ?cur_round))
+	(previous_strategy (prev_round ?prev_round&:(eq ?prev_round (- ?cur_round 1))) (prev_strat ?prev_strat))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?prev_strat)))
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Write the chosen strategy to file   ;
+; ; so that in the next rounds we can   ;
+; ; remember what we were trying to do  ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::write-strategy-to-file
+	(declare (salience -1))
+	(not (wrote_strategy_to_file))
+	(game (round ?cur_round))
+	(self (strategy ?strat&~nil))
+	=>
+	(assert (wrote_strategy_to_file))
+	(open ?*PREVIOUS_STRATEGY_FILENAME* wf "w")
+	(printout wf (str-cat
+					"(previous_strategy"
+					" (prev_round " ?cur_round ")"
+					" (prev_strat " ?strat ")"
+					")") crlf)
+	(close wf))

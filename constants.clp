@@ -6,6 +6,7 @@
 
 ; ; FILENAME CONSTANTS
 (defglobal ?*PLAYER_MOVECOUNT_FILENAME* = player_move_count.txt)
+(defglobal ?*PREVIOUS_STRATEGY_FILENAME* = previous_strategy.txt)
 
 ; ; PLAYER ATTRIBUTE CONSTANTS
 (defglobal ?*TIGHT* = tight)

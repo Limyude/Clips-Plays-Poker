@@ -95,6 +95,10 @@
 	(slot lose_to_cpp_probability (type FLOAT) (default 0.0))				; probability of the strongest player losing to me
 	(slot likely_type_of_hand (type SYMBOL) (default ?*MARGINAL_HAND*)))	; likely type of hand of the strongest player
 	
+; ; Template used for storing the strategy used in the previous betting round
+(deftemplate MAIN::previous_strategy
+	(slot prev_round (type INTEGER) (default 0))
+	(slot prev_strat (type SYMBOL)))
 	
 
 
@@ -157,4 +161,4 @@
 	(player (player_id 8) (name "Bad Guy 8") (money 40.0) (bet 0.0) (position 8) (move nil))
 	(player (player_id 9) (name "Bad Guy 9") (money 40.0) (bet 0.0) (position 9) (move nil))
 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 0) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0)))
+	(game (round 1) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0)))
