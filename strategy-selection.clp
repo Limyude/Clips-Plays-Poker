@@ -334,6 +334,13 @@
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
 	
+; ; Default position (in case it is not a 3-10 player game)
+(defrule STRATEGY-SELECTION:: determine-position-type-default
+	(declare (salience -1))
+	?self <- (self (position_type nil))
+	=>
+	(modify ?self (position_type ?*POSITION_EARLY*)))
+	
 
 ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ;
