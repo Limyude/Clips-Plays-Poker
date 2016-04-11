@@ -339,7 +339,7 @@
 	(declare (salience -1))
 	?self <- (self (position_type nil))
 	=>
-	(modify ?self (position_type ?*POSITION_EARLY*)))
+	(modify ?self (position_type ?*POSITION_LATE*)))
 	
 
 ; ; ; ; ; ; ; ; ; ; ; ;
