@@ -56,6 +56,7 @@
 	(slot position (type INTEGER) (default 0))			; Position in the round of betting (should be unique)
 	(slot position_type (type SYMBOL))					; Position type (early/mid/late/sb/bb)
 	(slot hand_type (type SYMBOL))						; Hand type (AA, KK, QQ, AKs, AKo, etc.)
+	(slot win_probability (type FLOAT) (default -1.0))	; Calculated probability of winning the game
 	(slot strategy (type SYMBOL)))						; the strategy being adopted by myself
 
 	
@@ -153,7 +154,7 @@
 	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
 	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
 	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
-	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3) (win_probability 0.5)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
 	(player (player_id 1) (name "Bad Guy 4") (money 13.37) (bet 0.0) (position 4) (move nil))
 	(player (player_id 3) (name "Bad Guy 5") (money 40.0) (bet 0.0) (position 5) (move nil))
 	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 6) (move nil))
