@@ -20,6 +20,11 @@
 (defglobal ?*INDUCEFOLDS_STRATEGY* = induce-folds)					; moves to take: bluff (like when playing against a possibly weak marginal hand with an air hand)
 (defglobal ?*INDUCEBETS_STRATEGY* = induce-bets)					; moves to take: value bet/check (like when against an air hand)
 
+; ; WIN PROBABILITY THRESHOLD CONSTANTS
+(defglobal ?*WINPROB_THRESHOLD_CUTLOSSES* = 0.3)		; below 0.3, always cut losses
+(defglobal ?*WINPROB_THRESHOLD_DEFENSIVE* = 0.4)		; (0.3, 0.4] & have raisers, defensive
+(defglobal ?*WINPROB_THRESHOLD_INDUCEBETS* = 0.7)		; above 0.7, always induce bets
+
 ; ; TYPE OF HAND CONSTANTS
 (defglobal ?*AIR_HAND* = air-hand)
 (defglobal ?*MARGINAL_HAND* = marginal-hand)

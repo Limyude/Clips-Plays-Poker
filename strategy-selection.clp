@@ -865,31 +865,125 @@
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
 	
+
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; Strategy selection during the FLOP;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::select-strategy-flop-induce-bets
+	(game (round 1))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(> ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-cut-losses
+	(game (round 1))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+																(< ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
+																(>= ?win_prob 0.0))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-continuation-bet
+	(game (round 1))
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or (eq ?prev_strat ?*INDUCEBETS_STRATEGY*) (eq ?prev_strat ?*INDUCEFOLDS_STRATEGY*))))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)))
+	=>
+	(modify ?self (strategy ?prev_strat)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-bluff
+	(game (round 1))
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or
+													(eq ?prev_strat ?*CUTLOSSES_STRATEGY*)
+													(eq ?prev_strat ?*DEFENSIVE_STRATEGY*))))
+	(num_raisers ?nr)
+	?self <- (self (strategy nil) (win_probability ?win_prob))
+	(or 
+		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*) (<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*) (< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
+			(eq ?nr 0))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-defensive
+	(game (round 1))
+	(num_raisers ?nr&:(> ?nr 0))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+																(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
+																(< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*))))
+	=>
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+	
+	
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; Strategy selection during the RIVER;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::select-strategy-river-induce-bets
+	(game (round 3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(> ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-river-bluff
+	(game (round 3))
+	(previous_strategy (prev_round ~3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+																(> ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
+																(<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+
+	
+
+	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; Set strategy to defaults;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 
+(defrule STRATEGY-SELECTION::select-strategy-river-default
+	(declare (salience -9))		; ; important to cut losses on river as a default
+	(game (round 3))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+
 ; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
 (defrule STRATEGY-SELECTION::select-strategy-preflop-default
-	(declare (salience -1))			; ; Only set default if no other rule set it
+	(declare (salience -10))			; ; Only set default if no other rule set it
 	(game (round 0))
 	?self <- (self (strategy nil))
 	=>
 	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 
+	
+	
+; ; If postflop but have no strategy chosen, follow the previous strategy if there is one
+(defrule STRATEGY-SELECTION::select-strategy-postflop-default-previous-strategy
+	(declare (salience -10))
+	(game (round ?cur_round&:(>= ?cur_round 1)))
+	?self <- (self (strategy nil))
+	(previous_strategy (prev_round ?prev_round&:(or
+													(eq ?prev_round (- ?cur_round 1)) (eq ?prev_round ?cur_round)))
+													(prev_strat ?prev_strat))
+	=>
+	(modify ?self (strategy ?prev_strat)))
 ; ; If postflop but have no strategy chosen, pick defensive
 (defrule STRATEGY-SELECTION::select-strategy-postflop-default
-	(declare (salience -1))			; ; Only set default if no other rule set it
+	(declare (salience -11))			; ; Only set default if no other rule set it
 	(game (round ?r&:(>= ?r 1)))
 	?self <- (self (strategy nil))
 	=>
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+
+
 	
 ; ; Print out the strategy we are using to select a move
 (defrule STRATEGY-SELECTION::print-strategy-used
-	(declare (salience -1))
+	(declare (salience -100))
 	(not (printed_strategy))
 	(self (strategy ?strat&~nil))
 	=>
@@ -921,14 +1015,6 @@
 		(assert-string ?line))
 	(close rf))
 	
-(defrule STRATEGY-SELECTION::set-current-strategy-to-previous-strategy
-	(declare (salience 1))
-	(game (round ?cur_round))
-	(previous_strategy (prev_round ?prev_round&:(eq ?prev_round (- ?cur_round 1))) (prev_strat ?prev_strat))
-	?self <- (self (strategy nil))
-	=>
-	(modify ?self (strategy ?prev_strat)))
-	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Write the chosen strategy to file   ;
@@ -938,7 +1024,7 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 (defrule STRATEGY-SELECTION::write-strategy-to-file
-	(declare (salience -1))
+	(declare (salience -100))
 	(not (wrote_strategy_to_file))
 	(game (round ?cur_round))
 	(self (strategy ?strat&~nil))
