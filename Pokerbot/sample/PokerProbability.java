@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class PokerProbability {
 
@@ -17,11 +18,6 @@ public class PokerProbability {
 
   private static final int PUBLIC_CARDS   = 5;
   private static final int TURN       = 4;
-
-  private static final int OPP_CARD_1_POS = 5;
-  private static final int OPP_CARD_2_POS = 6;
-  private static final int RIVER_POS    = 7;
-  private static final int TURN_POS   = 8;
 
   private int[] HandRanks;
 
@@ -102,8 +98,6 @@ public class PokerProbability {
       for(int card2 = card1+1; card2<=Card.MAX_VAL; card2++) {
         if(!seenCards.contains(card1) && !seenCards.contains(card2)) {
 
-          System.out.println(card1 + ", " + card2);
-
           // adding opponent cards
           opponentCards[0] = card1;
           opponentCards[1] = card2;
@@ -157,7 +151,8 @@ public class PokerProbability {
     int[][] HP = new int[3][3];
     int[] opponentCards = new int[2];
     int[] possiblePublicCards = new int[PUBLIC_CARDS];
-    ArrayList<Integer> seenCards = new ArrayList<>(9);
+    HashMap<Integer, Integer> seenCards = new HashMap<>();
+    boolean hasTurn = publicCards.length >= TURN;
     int count = 0;
 
     // initialize
@@ -167,11 +162,10 @@ public class PokerProbability {
     Arrays.fill(HPTotal, 0);
 
     for(int playerCard : playerCards)
-      seenCards.add(playerCard);
+      seenCards.put(playerCard, 1);
     for(int publicCard : publicCards)
-      seenCards.add(publicCard);
-    seenCards.add(-1);
-    seenCards.add(-1);
+      seenCards.put(publicCard, 1);
+
 
     for(int i=0; i<publicCards.length; i++)
       possiblePublicCards[i] = publicCards[i];
@@ -183,15 +177,15 @@ public class PokerProbability {
     // exhaust all possibilities of opponent's cards
     for(int card1=Card.MIN_VAL; card1<=Card.MAX_VAL-1; card1++) {
       for(int card2 = card1+1; card2<=Card.MAX_VAL; card2++) {
-        if(!seenCards.contains(card1) && !seenCards.contains(card2)) {
+        if(!seenCards.containsKey(card1) && !seenCards.containsKey(card2)) {
           int index = -1;
 
           // adding opponent cards
           opponentCards[0] = card1;
           opponentCards[1] = card2;
 
-          seenCards.add(OPP_CARD_1_POS,card1);
-          seenCards.add(OPP_CARD_2_POS, card2);
+          seenCards.put(card1, 1);
+          seenCards.put(card2, 1);
 
           // compare between player's best hand and opponent's best hand
           int opponentRank = handRank(opponentCards, publicCards);
@@ -199,18 +193,18 @@ public class PokerProbability {
           else if(playerRank == opponentRank)   index = TIED;
           else if(playerRank < opponentRank)    index = BEHIND;
 
-          count++;
-
           // exhaust all possibilities of future public cards
-          if(publicCards.length < TURN) {
+          if(!hasTurn) {
 
             for(int card3=Card.MIN_VAL; card3<=Card.MAX_VAL-1; card3++) {
               for(int card4=card3+1; card4<=Card.MAX_VAL; card4++) {
-                if(!seenCards.contains(card3) && !seenCards.contains(card4)) {
-                  seenCards.add(TURN_POS, card3);
-                  seenCards.add(RIVER_POS, card4);
+                if(!seenCards.containsKey(card3) && !seenCards.containsKey(card4)) {
+
                   possiblePublicCards[3] = card3;
+                  seenCards.put(card3, 1);
+
                   possiblePublicCards[4] = card4;
+                  seenCards.put(card4, 1);
 
                   int futurePlayerRank = handRank(playerCards, possiblePublicCards);
                   int futureOpponentRank = handRank(opponentCards, possiblePublicCards);
@@ -220,9 +214,10 @@ public class PokerProbability {
                   else if(futurePlayerRank < futureOpponentRank)  HP[index][BEHIND]++;
 
                   HPTotal[index]++;
+                  count++;
 
-                  seenCards.remove(TURN_POS);
-                  seenCards.remove(RIVER_POS);
+                  seenCards.remove(card3);
+                  seenCards.remove(card4);
                 }
               }
             }
@@ -230,8 +225,8 @@ public class PokerProbability {
           } else {
 
             for(int card3=Card.MIN_VAL; card3<=Card.MAX_VAL; card3++) {
-              if(!seenCards.contains(card3)) {
-                seenCards.add(RIVER_POS, card3);
+              if(!seenCards.containsKey(card3)) {
+                seenCards.put(card3, 1);
                 possiblePublicCards[4] = card3;
 
                 int futurePlayerRank = handRank(playerCards, possiblePublicCards);
@@ -243,14 +238,14 @@ public class PokerProbability {
 
                 HPTotal[index]++;
 
-                seenCards.remove(RIVER_POS);
+                seenCards.remove(card3);
               }
             }
 
           }
 
-          seenCards.remove(OPP_CARD_1_POS);
-          seenCards.remove(OPP_CARD_2_POS);
+          seenCards.remove(card1);
+          seenCards.remove(card2);
         }
       }
     }
