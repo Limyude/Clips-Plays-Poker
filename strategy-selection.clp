@@ -887,13 +887,13 @@
 	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 (defrule STRATEGY-SELECTION::select-strategy-flop-continuation-bet
 	(game (round 1))
-	(previous_strategy (prev_round 0) (prev_strat ?prev_strat&:(or (eq ?prev_strat ?*INDUCEBETS_STRATEGY*) (eq ?prev_strat ?*INDUCEFOLDS_STRATEGY*))))
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or (eq ?prev_strat ?*INDUCEBETS_STRATEGY*) (eq ?prev_strat ?*INDUCEFOLDS_STRATEGY*))))
 	?self <- (self (strategy nil) (win_probability ?win_prob&:(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)))
 	=>
 	(modify ?self (strategy ?prev_strat)))
 (defrule STRATEGY-SELECTION::select-strategy-flop-bluff
 	(game (round 1))
-	(previous_strategy (prev_round 0) (prev_strat ?prev_strat&:(or
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or
 													(eq ?prev_strat ?*CUTLOSSES_STRATEGY*)
 													(eq ?prev_strat ?*DEFENSIVE_STRATEGY*))))
 	(num_raisers ?nr)
@@ -913,6 +913,29 @@
 	=>
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
 	
+	
+	
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; Strategy selection during the RIVER;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::select-strategy-river-induce-bets
+	(game (round 3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(> ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-river-bluff
+	(game (round 3))
+	(previous_strategy (prev_round ~3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+																(> ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
+																(<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+
+	
 
 	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
@@ -920,6 +943,13 @@
 ; ; Set strategy to defaults;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+
+(defrule STRATEGY-SELECTION::select-strategy-river-default
+	(declare (salience -9))		; ; important to cut losses on river as a default
+	(game (round 3))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 
 ; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
 (defrule STRATEGY-SELECTION::select-strategy-preflop-default
@@ -936,7 +966,9 @@
 	(declare (salience -10))
 	(game (round ?cur_round&:(>= ?cur_round 1)))
 	?self <- (self (strategy nil))
-	(previous_strategy (prev_round ?prev_round&:(eq ?prev_round (- ?cur_round 1))) (prev_strat ?prev_strat))
+	(previous_strategy (prev_round ?prev_round&:(or
+													(eq ?prev_round (- ?cur_round 1)) (eq ?prev_round ?cur_round)))
+													(prev_strat ?prev_strat))
 	=>
 	(modify ?self (strategy ?prev_strat)))
 ; ; If postflop but have no strategy chosen, pick defensive
