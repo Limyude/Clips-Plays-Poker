@@ -7,6 +7,10 @@ public class Card implements Comparable<Card>{
     public final Suite s;
     public final Value v;
 
+    public static final int MIN_VAL = 1;
+    public static final int MAX_VAL = 52;
+
+
     Card(Suite s, Value v){
         this.s = s;
         this.v = v;
@@ -49,5 +53,9 @@ public class Card implements Comparable<Card>{
             Suite.asString(this.s),
             cardValue,
             location);
+    }
+
+    public int getValue() {
+        return Value.value(v) * 4 + Suite.value(s);
     }
 }

@@ -6,6 +6,10 @@ package sample;
 public enum Value {
     TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE;
 
+    public static Value[] ALL_VALUES = {
+        TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE
+    };
+
     public static String asString(Value v){
         switch (v){
             case TWO : return "2";

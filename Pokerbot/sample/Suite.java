@@ -6,6 +6,10 @@ package sample;
 public enum Suite {
     SPADE, HEART, DIAMOND, CLUB;
 
+    public static Suite[] ALL_SUITES = {
+        SPADE, HEART, DIAMOND, CLUB
+    };
+
     public static String asString(Suite s){
         switch (s){
             case SPADE : return "s";
