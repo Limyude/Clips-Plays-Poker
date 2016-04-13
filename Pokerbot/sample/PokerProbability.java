@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PokerProbability {
 
@@ -32,11 +33,15 @@ public class PokerProbability {
    *    winning probability (0-1)
    * */
 
-  public double calculateWinningProbability(Card[] playerCards, ArrayList<Card> publicCards,
+  public double calculateWinningProbability(Card[] playerCards, ArrayList<Card> publicCardsList,
       int numOpponents) {
 
-    double handStrength = calculateHandStrength(playerCards, publicCards, numOpponents);
-    double[] handPotential = calculateHandPotential(playerCards, publicCards, numOpponents);
+    Card[] publicCards = publicCardsList.toArray(new Card[publicCardsList.size()]);
+    int[] intPlayerCards = intCards(playerCards);
+    int[] intPublicCards = intCards(publicCards);
+
+    double handStrength = calculateHandStrength(intPlayerCards, intPublicCards, numOpponents);
+    double[] handPotential = calculateHandPotential(intPlayerCards, intPublicCards, numOpponents);
     double PPot = handPotential[0];
     double NPot = handPotential[1];
 
@@ -58,13 +63,13 @@ public class PokerProbability {
    *
    * */
 
-  private double calculateHandStrength(Card[] playerCards, ArrayList<Card> publicCards,
+  private double calculateHandStrength(int[] playerCards, int[] publicCards,
       int numOpponents) {
     double handStrength = oneOpponentHandStrength(playerCards, publicCards);
     return Math.pow(handStrength, numOpponents);
   }
 
-  private static double oneOpponentHandStrength(Card[] playerCards, ArrayList<Card> publicCards) {
+  private static double oneOpponentHandStrength(int[] playerCards, int[] publicCards) {
     double handStrength = 0;
 
     // fill in code
@@ -87,7 +92,7 @@ public class PokerProbability {
    *
    * */
 
-  private double[] calculateHandPotential(Card[] playerCards, ArrayList<Card> publicCards,
+  private double[] calculateHandPotential(int[] playerCards, int[] publicCards,
       int numOpponents) {
     double[] handPotential = oneOpponentHandPotential(playerCards, publicCards);
     double PPot = Math.pow(handPotential[0], numOpponents);
@@ -96,10 +101,20 @@ public class PokerProbability {
     return new double[] {PPot, NPot};
   }
 
-  private double[] oneOpponentHandPotential(Card[] playerCards, ArrayList<Card> publicCards) {
+  private double[] oneOpponentHandPotential(int[] playerCards, int[] publicCards) {
     double PPot = 0.0f, NPot = 0.0f;
+    int[] HPTotal = new int[3];
+    int[][] HP = new int[3][3];
 
-    // fill in code
+    // initialize
+    Arrays.fill(HPTotal, 0);
+
+    for(int i=0; i<3; i++)
+      Arrays.fill(HP[i], 0);
+
+    // start algorithm
+
+
 
     return new double[] {PPot, NPot};
   }
@@ -116,11 +131,11 @@ public class PokerProbability {
    * Algorithm:
    *    TwoPlusTwoEvaluator
    * */
-  private int rank(Card[] seenCards) {
+  private int rank(int[] seenCards) {
     int rank = 53;
 
     for(int index = 0; index<seenCards.length; index++) {
-      rank = HandRanks[rank + seenCards[index].getValue()];
+      rank = HandRanks[rank + seenCards[index]];
     }
 
     return rank;
@@ -157,5 +172,27 @@ public class PokerProbability {
         return (b[offset + 3] << 24) + ((b[offset + 2] & 0xFF) << 16)
                 + ((b[offset + 1] & 0xFF) << 8) + (b[offset] & 0xFF);
     }
+
+
+  /*
+   * Helper function
+   * */
+
+  private Card[] concat(Card[] playerCards, Card[] publicCards) {
+    Card[] concat = new Card[playerCards.length + publicCards.length];
+
+    System.arraycopy(playerCards, 0, concat, 0, playerCards.length);
+        System.arraycopy(publicCards, 0, concat, playerCards.length, publicCards.length);
+
+    return concat;
+  }
+
+  private int[] intCards(Card[] cards) {
+    int[] intCards = new int[cards.length];
+    for(int i=0; i<cards.length; i++)
+      intCards[i] = cards[i].getValue();
+
+    return intCards;
+  }
 
 }
