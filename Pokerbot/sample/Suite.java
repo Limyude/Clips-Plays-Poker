@@ -15,4 +15,14 @@ public enum Suite {
             default: return "";
         }
     }
+
+    public static int value(Suite s) {
+        switch(s) {
+            case CLUB: return 1;
+            case DIAMOND: return 2;
+            case HEART: return 3;
+            case SPADE: return 4;
+            default: return -1;
+        }
+    }
 }

@@ -1,8 +1,26 @@
 package sample;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class PokerProbability {
+
+  private static final int HAND_RANK_SIZE   = 32487834;
+  private static final String HAND_RANK_FILE  = "HandRanks.dat";
+
+  private int[] HandRanks;
+
+  /*
+   * Constructor
+   * */
+
+  public PokerProbability() {
+    HandRanks = new int[HAND_RANK_SIZE];
+    loadHandRanks();
+  }
+
 
   /*
    * Calculate the poker's winning probability
@@ -14,7 +32,7 @@ public class PokerProbability {
    *    winning probability (0-1)
    * */
 
-  public static double calculateWinningProbability(Card[] playerCards, ArrayList<Card> publicCards,
+  public double calculateWinningProbability(Card[] playerCards, ArrayList<Card> publicCards,
       int numOpponents) {
 
     double handStrength = calculateHandStrength(playerCards, publicCards, numOpponents);
@@ -40,7 +58,7 @@ public class PokerProbability {
    *
    * */
 
-  private static double calculateHandStrength(Card[] playerCards, ArrayList<Card> publicCards,
+  private double calculateHandStrength(Card[] playerCards, ArrayList<Card> publicCards,
       int numOpponents) {
     double handStrength = oneOpponentHandStrength(playerCards, publicCards);
     return Math.pow(handStrength, numOpponents);
@@ -69,7 +87,7 @@ public class PokerProbability {
    *
    * */
 
-  private static double[] calculateHandPotential(Card[] playerCards, ArrayList<Card> publicCards,
+  private double[] calculateHandPotential(Card[] playerCards, ArrayList<Card> publicCards,
       int numOpponents) {
     double[] handPotential = oneOpponentHandPotential(playerCards, publicCards);
     double PPot = Math.pow(handPotential[0], numOpponents);
@@ -78,7 +96,7 @@ public class PokerProbability {
     return new double[] {PPot, NPot};
   }
 
-  private static double[] oneOpponentHandPotential(Card[] playerCards, ArrayList<Card> publicCards) {
+  private double[] oneOpponentHandPotential(Card[] playerCards, ArrayList<Card> publicCards) {
     double PPot = 0.0f, NPot = 0.0f;
 
     // fill in code
@@ -98,9 +116,46 @@ public class PokerProbability {
    * Algorithm:
    *    TwoPlusTwoEvaluator
    * */
-  private static int rank(Card[] seenCards) {
-    int rank = 0;
+  private int rank(Card[] seenCards) {
+    int rank = 53;
+
+    for(int index = 0; index<seenCards.length; index++) {
+      rank = HandRanks[rank + seenCards[index].getValue()];
+    }
 
     return rank;
   }
+
+  private void loadHandRanks() {
+    int tableSize = HAND_RANK_SIZE * 4;
+    byte[] bTable = new byte[tableSize];
+    BufferedInputStream br = null;
+
+    try {
+      br = new BufferedInputStream(new FileInputStream(HAND_RANK_FILE));
+      int bytesRead = br.read(bTable, 0, tableSize);
+            if (bytesRead != tableSize) {
+                System.err.println("file bytes read is different from: " + tableSize);
+            }
+
+    } catch(Exception e) {
+      System.err.println("Exception: " + e.getMessage());
+    } finally {
+      try {
+        br.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      for (int i = 0; i < HAND_RANK_SIZE; i++) {
+              HandRanks[i] = littleEndianByteArrayToInt(bTable, i * 4);
+          }
+    }
+  }
+
+  private int littleEndianByteArrayToInt(byte[] b, int offset) {
+        return (b[offset + 3] << 24) + ((b[offset + 2] & 0xFF) << 16)
+                + ((b[offset + 1] & 0xFF) << 8) + (b[offset] & 0xFF);
+    }
+
 }
