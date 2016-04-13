@@ -1,0 +1,3 @@
+# cat constants.clp CPP.clp move-selection.clp opponent-playstyle-determination.clp own-hand-determination.clp possible-move-determination.clp strategy-selection.clp > ALL.clp
+javac -cp CLIPSJNI.jar:sample:. sample/*.java &&
+java -cp CLIPSJNI.jar:sample:. sample.Main

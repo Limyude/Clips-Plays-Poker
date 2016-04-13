@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <Pane prefHeight="120.0" prefWidth="600.0">
+         <children>
+            <Button fx:id="checkButton" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" onAction="#check" text="Check" />
+            <Button fx:id="raiseButton" layoutX="81.0" layoutY="27.0" mnemonicParsing="false" onAction="#raise" text="Raise" />
+            <Button fx:id="callButton" layoutX="146.0" layoutY="27.0" mnemonicParsing="false" onAction="#call" text="Call" />
+            <Button fx:id="foldButton" layoutX="204.0" layoutY="27.0" mnemonicParsing="false" onAction="#fold" text="Fold" />
+            <TextField fx:id="raiseAmount" layoutX="80.0" layoutY="69.0" prefHeight="25.0" prefWidth="44.0" />
+            <Label layoutX="286.0" layoutY="31.0" text="Hand:" />
+            <Label fx:id="handLabel" layoutX="325.0" layoutY="31.0" text="No Idea" />
+            <Label layoutX="286.0" layoutY="52.0" text="Stack:" />
+            <Label fx:id="stackLabel" layoutX="326.0" layoutY="52.0" text="1000" />
+            <Label layoutX="285.0" layoutY="73.0" text="River:" />
+            <Label fx:id="riverLabel" layoutX="325.0" layoutY="73.0" text="Nothing" />
+            <Label layoutX="418.0" layoutY="31.0" text="Turn:" />
+            <Label fx:id="turnLabel" layoutX="452.0" layoutY="31.0" text="Your Turn" />
+            <Button fx:id="startGameButton" layoutX="166.0" layoutY="69.0" mnemonicParsing="false" onAction="#startGame" text="Start Game" />
+            <Label layoutX="417.0" layoutY="52.0" text="Player Pot:" />
+            <Label layoutX="479.0" layoutY="53.0" text="0" fx:id="playerPotLabel" />
+            <Label layoutX="417.0" layoutY="73.0" text="AI Pot:" />
+            <Label layoutX="479.0" layoutY="73.0" text="0" fx:id="aiPotLabel" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
