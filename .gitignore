@@ -3,3 +3,4 @@ Pokerbot/*.txt
 .idea
 out
 *.DS_STORE
+Pokerbot/sample/HandRanks.dat
