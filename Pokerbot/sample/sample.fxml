@@ -1,31 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
-      <Pane prefHeight="120.0" prefWidth="600.0">
+      <Pane prefHeight="700.0" prefWidth="800.0">
          <children>
-            <Button fx:id="checkButton" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" onAction="#check" text="Check" />
-            <Button fx:id="raiseButton" layoutX="81.0" layoutY="27.0" mnemonicParsing="false" onAction="#raise" text="Raise" />
-            <Button fx:id="callButton" layoutX="146.0" layoutY="27.0" mnemonicParsing="false" onAction="#call" text="Call" />
-            <Button fx:id="foldButton" layoutX="204.0" layoutY="27.0" mnemonicParsing="false" onAction="#fold" text="Fold" />
-            <TextField fx:id="raiseAmount" layoutX="80.0" layoutY="69.0" prefHeight="25.0" prefWidth="44.0" />
-            <Label layoutX="286.0" layoutY="31.0" text="Hand:" />
-            <Label fx:id="handLabel" layoutX="325.0" layoutY="31.0" text="No Idea" />
-            <Label layoutX="286.0" layoutY="52.0" text="Stack:" />
-            <Label fx:id="stackLabel" layoutX="326.0" layoutY="52.0" text="1000" />
-            <Label layoutX="285.0" layoutY="73.0" text="River:" />
-            <Label fx:id="riverLabel" layoutX="325.0" layoutY="73.0" text="Nothing" />
-            <Label layoutX="418.0" layoutY="31.0" text="Turn:" />
-            <Label fx:id="turnLabel" layoutX="452.0" layoutY="31.0" text="Your Turn" />
-            <Button fx:id="startGameButton" layoutX="166.0" layoutY="69.0" mnemonicParsing="false" onAction="#startGame" text="Start Game" />
-            <Label layoutX="417.0" layoutY="52.0" text="Player Pot:" />
-            <Label layoutX="479.0" layoutY="53.0" text="0" fx:id="playerPotLabel" />
-            <Label layoutX="417.0" layoutY="73.0" text="AI Pot:" />
-            <Label layoutX="479.0" layoutY="73.0" text="0" fx:id="aiPotLabel" />
+            <Button fx:id="checkButton" layoutX="36.0" layoutY="621.0" mnemonicParsing="false" onAction="#check" prefHeight="37.0" prefWidth="125.0" text="Check" />
+            <Button fx:id="raiseButton" layoutX="195.0" layoutY="621.0" mnemonicParsing="false" onAction="#raise" prefHeight="37.0" prefWidth="125.0" text="Raise" />
+            <Button fx:id="callButton" layoutX="381.0" layoutY="621.0" mnemonicParsing="false" onAction="#call" prefHeight="37.0" prefWidth="125.0" text="Call" />
+            <Button fx:id="foldButton" layoutX="532.0" layoutY="621.0" mnemonicParsing="false" onAction="#fold" prefHeight="37.0" prefWidth="125.0" text="Fold" />
+            <TextField fx:id="raiseAmount" layoutX="236.0" layoutY="667.0" prefHeight="25.0" prefWidth="44.0" />
+            <Label layoutX="92.0" layoutY="321.0" text="Hand:" />
+            <Label fx:id="handLabel" layoutX="131.0" layoutY="321.0" text="No Idea" />
+            <Label layoutX="92.0" layoutY="342.0" text="Stack:" />
+            <Label fx:id="stackLabel" layoutX="132.0" layoutY="342.0" text="1000" />
+            <Label layoutX="91.0" layoutY="363.0" text="River:" />
+            <Label fx:id="riverLabel" layoutX="131.0" layoutY="363.0" text="Nothing" />
+            <Label layoutX="544.0" layoutY="308.0" text="Turn:" />
+            <Label fx:id="turnLabel" layoutX="578.0" layoutY="308.0" text="Your Turn" />
+            <Button fx:id="startGameButton" layoutX="643.0" layoutY="20.0" mnemonicParsing="false" onAction="#startGame" prefHeight="37.0" prefWidth="114.0" text="Start Game" textAlignment="CENTER" />
+            <Label layoutX="543.0" layoutY="329.0" text="Player Pot:" />
+            <Label fx:id="playerPotLabel" layoutX="613.0" layoutY="329.0" text="0" />
+            <Label layoutX="543.0" layoutY="350.0" text="AI Pot:" />
+            <Label fx:id="aiPotLabel" layoutX="605.0" layoutY="350.0" text="0" />
+            <ImageView fx:id="publicCard1" fitHeight="177.0" fitWidth="200.0" layoutX="28.0" layoutY="101.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="publicCard2" fitHeight="177.0" fitWidth="200.0" layoutX="176.0" layoutY="101.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="publicCard3" fitHeight="177.0" fitWidth="200.0" layoutX="337.0" layoutY="101.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="publicCard4" fitHeight="177.0" fitWidth="200.0" layoutX="488.0" layoutY="101.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="publicCard5" fitHeight="177.0" fitWidth="200.0" layoutX="637.0" layoutY="101.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="playerCard1" fitHeight="177.0" fitWidth="200.0" layoutX="28.0" layoutY="403.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="playerCard2" fitHeight="177.0" fitWidth="200.0" layoutX="185.0" layoutY="403.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="aiCard1" fitHeight="177.0" fitWidth="200.0" layoutX="488.0" layoutY="403.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="aiCard2" fitHeight="177.0" fitWidth="200.0" layoutX="637.0" layoutY="403.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../card_images/empty_card.png" />
+               </image>
+            </ImageView>
          </children>
       </Pane>
    </children>
