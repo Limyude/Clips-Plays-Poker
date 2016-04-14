@@ -108,6 +108,9 @@ public class Controller {
         // Calculate Winning Probabilities
         calcWinProbabilities();
         this.state.gameState = State.GameState.FLOP;
+        System.out.println();
+        System.out.println("Game now in FLOP");
+        System.out.println();
         getAiAction(this.state);
         persistAiMove();
         renderState();
@@ -121,6 +124,9 @@ public class Controller {
         // Calculate Winning Probabilities
         calcWinProbabilities();
         this.state.gameState = State.GameState.TURN;
+        System.out.println();
+        System.out.println("Game now in TURN");
+        System.out.println();
         getAiAction(this.state);
         persistAiMove();
         renderState();
@@ -134,12 +140,18 @@ public class Controller {
         // Calculate Winning Probabilities
         calcWinProbabilities();
         this.state.gameState = State.GameState.RIVER;
+        System.out.println();
+        System.out.println("Game now in RIVER");
+        System.out.println();
         getAiAction(this.state);
         persistAiMove();
         renderState();
     }
 
     public void aiWins(){
+        System.out.println();
+        System.out.println("Game won by AI: $" + this.state.playerPot);
+        System.out.println();
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Result");
         alert.setHeaderText("You Lost!\n\nCPP gains $" + this.state.playerPot);
@@ -148,6 +160,9 @@ public class Controller {
     }
 
     public void playerWins(){
+        System.out.println();
+        System.out.println("Game won by Player: $" + this.state.aiPot);
+        System.out.println();
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Result");
         alert.setHeaderText("You Won!\n\nYou gain $" + this.state.aiPot);
@@ -225,7 +240,10 @@ public class Controller {
     }
 
     public void startGame(ActionEvent actionEvent) {
-
+        System.out.println();
+        System.out.println("STARTING NEW GAME");
+        System.out.println("=================");
+        System.out.println();
         ArrayList<Card> cards = new ArrayList<Card>();
         BlockingQueue<Card> deck = new ArrayBlockingQueue<Card>(52);
 
@@ -258,6 +276,10 @@ public class Controller {
         this.state.aiPot = BLIND;
         this.state.playerPot = BLIND;
 
+        calcWinProbabilities();
+        System.out.println();
+        System.out.println("Game now in PREFLOP");
+        System.out.println();
         getAiAction(this.state);
         persistAiMove();
         this.state.turn = true;

@@ -6,6 +6,13 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
+(defrule STRATEGY-SELECTION::print-win-probability
+	(self (win_probability ?win_prob))
+	(not (printed_win_prob))
+	=>
+	(assert (printed_win_prob))
+	(printout t "CPP winning probability: " ?win_prob crlf))
+
 (defrule STRATEGY-SELECTION::count-players
 	=>
 	(bind ?num_players (+ (length$ (find-all-facts ((?p player)) TRUE)) (length$ (find-all-facts ((?s self)) TRUE))))

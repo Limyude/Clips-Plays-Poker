@@ -50,7 +50,7 @@ public class PokerBot {
 
   public State play(State gameState){
     System.out.println("PokerBot Play in Progress...");
-    System.out.println("============================");
+    System.out.println("----------------------------");
     clips.reset();
     assertFacts(gameState);
     System.out.println();
@@ -79,6 +79,7 @@ public class PokerBot {
       System.out.println("FUCKK!!!!");
       System.out.println(e.getMessage());
     }
+    System.out.println("----------------------------");
     return gameState;
   }
 
