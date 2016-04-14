@@ -47,7 +47,23 @@ public class Controller {
     }
 
     public void raise(ActionEvent actionEvent) {
-        // raiseAmount.getText()
+        double amount = Double.parseDouble(raiseAmount.getText());
+        if(amount > this.state.playerStack){
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Um...");
+            alert.setHeaderText("You can only raise by upto $" + this.state.playerStack);
+            alert.showAndWait();
+        }else{
+            this.state.playerStack -= amount;
+            this.state.playerPot += amount;
+            this.state.lastMove.type = State.Type.RAISE;
+            switch(this.state.gameState){
+                case PREFLOP : { dealFlop(); }; break;
+                case FLOP : { dealTurn(); }; break;
+                case TURN : { dealRiver(); }; break;
+                case RIVER: { showdown(); }; break;
+            }
+        }
     }
 
     public void call(ActionEvent actionEvent) {
@@ -109,7 +125,7 @@ public class Controller {
     public void aiWins(){
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Result");
-        alert.setHeaderText("ai won");
+        alert.setHeaderText("You Lost!\n\nCPP gains $" + this.state.playerPot);
         this.state.aiStack += this.state.aiPot + this.state.playerPot;
         alert.showAndWait();
     }
@@ -117,7 +133,7 @@ public class Controller {
     public void playerWins(){
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Result");
-        alert.setHeaderText("player won");
+        alert.setHeaderText("You Won!\n\nYou gain $" + this.state.aiPot);
         this.state.playerStack += this.state.aiPot + this.state.playerPot;
         alert.showAndWait();
     }
@@ -128,7 +144,6 @@ public class Controller {
         }else{
             aiWins();
         }
-        resetBoard();
         renderState();
         this.state.gameState = State.GameState.GAMEOVER;
         renderState();
@@ -136,7 +151,6 @@ public class Controller {
 
     public void fold(ActionEvent actionEvent) {
         aiWins();
-        resetBoard();
         renderState();
         this.state.gameState = State.GameState.GAMEOVER;
         renderState();
@@ -145,6 +159,11 @@ public class Controller {
     public void calcWinProbabilities(){
         this.state.playerWinProbability = probCalc.calculateWinningProbability(this.state.playerCard, this.state.river, 1);
         this.state.aiWinProbability = probCalc.calculateWinningProbability(this.state.aiCard, this.state.river, 1);
+
+        System.out.println(String.format("Chance to Win Percentage ==> PLAYER: %.2f\tCPP: %.2f",
+            this.state.playerWinProbability,
+            this.state.aiWinProbability)
+        );
     }
 
     public State getAiAction(State state){
@@ -166,7 +185,6 @@ public class Controller {
                 handLabel.setText(this.state.playerCard[0].toString() + "," +  this.state.playerCard[1].toString());
             }catch(Exception e){
                 handLabel.setText("");
-                System.out.println("sadad");
             }
             stackLabel.setText(this.state.playerStack + "");
             riverLabel.setText(
@@ -205,7 +223,7 @@ public class Controller {
                 deck.put(cards.remove(randInt));
             }catch(Exception e){ System.out.print(e.getStackTrace());}
         }
-
+        resetBoard();
         try{
             this.state.playerCard[0] = deck.take();
             this.state.playerCard[1] = deck.take();
@@ -235,7 +253,6 @@ public class Controller {
             break;
             case FOLD: {
                 playerWins();
-                resetBoard();
                 renderState();
                 this.state.gameState = State.GameState.GAMEOVER;
                 renderState();

@@ -23,7 +23,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
         primaryStage.setTitle("Poker Bot");
-        primaryStage.setScene(new Scene(root, 600, 120));
+        primaryStage.setScene(new Scene(root, 800, 700));
         primaryStage.show();
     }
 

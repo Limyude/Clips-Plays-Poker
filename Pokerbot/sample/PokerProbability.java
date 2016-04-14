@@ -127,7 +127,7 @@ public class PokerProbability {
 
     handStrength = (ahead + tied/2.0f) / (double) (ahead + tied + behind);
 
-    System.out.println("HandStrength: " + handStrength + " " + count);
+    // System.out.println("HandStrength: " + handStrength + " " + count);
 
     return handStrength;
   }
@@ -266,7 +266,7 @@ public class PokerProbability {
     NPot = (HP[AHEAD][BEHIND] + HP[TIED][BEHIND]/2.0f + HP[AHEAD][TIED]/2.0f) /
         (double) (HPTotal[AHEAD] + HPTotal[TIED]/2.0f);
 
-    System.out.println(PPot + " " + NPot + " " + count);
+    // System.out.println(PPot + " " + NPot + " " + count);
 
     return new double[] {PPot, NPot};
   }

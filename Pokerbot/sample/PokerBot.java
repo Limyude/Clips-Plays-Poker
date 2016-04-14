@@ -27,7 +27,6 @@ public class PokerBot {
   ; ; Insert the facts and rules into working memory, and run it!
   (reset)
   (run)
-
   */
 
   public PokerBot(String filename){
@@ -47,12 +46,6 @@ public class PokerBot {
   public void loadResources(){
     // clips.load("PokerBot.clp");
     clips.load("bot_files/ALL.clp");
-    // clips.load("bot_files/CPP.clp");
-    // clips.load("bot_files/opponent-playstyle-determination.clp");
-    // clips.load("bot_files/own-hand-determination.clp");
-    // clips.load("bot_files/strategy-selection.clp");
-    // clips.load("bot_files/possible-move-determination.clp");
-    // clips.load("bot_files/move-selection.clp");
   }
 
   public State play(State gameState){
@@ -84,11 +77,6 @@ public class PokerBot {
     }catch(Exception e){
       System.out.println("");
       System.out.println("FUCKK!!!!");
-      // System.out.println(e.getStackTrace().getFileName() + " " +
-      //                    e.getStackTrace().getClassName() + " " +
-      //                    e.getStackTrace().getMethodName() + " " +
-      //                    e.getStackTrace().getLineNumber()
-      // );
       System.out.println(e.getMessage());
     }
     return gameState;
