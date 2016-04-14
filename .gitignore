@@ -2,3 +2,4 @@ Pokerbot/*.txt
 *.class
 .idea
 out
+*.DS_STORE

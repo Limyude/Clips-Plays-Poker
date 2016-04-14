@@ -18,6 +18,7 @@ public class PokerProbability {
 
   private static final int PUBLIC_CARDS   = 5;
   private static final int TURN       = 4;
+  private static final int RIVER        = 5;
 
   private int[] HandRanks;
 
@@ -44,16 +45,26 @@ public class PokerProbability {
   public double calculateWinningProbability(Card[] playerCards, ArrayList<Card> publicCardsList,
       int numOpponents) {
 
+    double winningProbability = 0.0f;
+
     Card[] publicCards = publicCardsList.toArray(new Card[publicCardsList.size()]);
     int[] intPlayerCards = intCards(playerCards);
     int[] intPublicCards = intCards(publicCards);
 
     double handStrength = calculateHandStrength(intPlayerCards, intPublicCards, numOpponents);
-    double[] handPotential = calculateHandPotential(intPlayerCards, intPublicCards, numOpponents);
-    double PPot = handPotential[0];
-    double NPot = handPotential[1];
 
-    double winningProbability = handStrength * (1 - NPot) + (1 - handStrength) * PPot;
+    if(publicCardsList.size() < RIVER) {
+      double[] handPotential = calculateHandPotential(intPlayerCards, intPublicCards, numOpponents);
+      double PPot = handPotential[0];
+      double NPot = handPotential[1];
+
+      winningProbability = handStrength * (1 - NPot) + (1 - handStrength) * PPot;
+
+    } else if(publicCardsList.size() == RIVER){
+      winningProbability = handStrength;
+    } else {
+      System.err.println("Public cards only has 5 cards maximum");
+    }
 
     return winningProbability;
   }
@@ -116,7 +127,7 @@ public class PokerProbability {
 
     handStrength = (ahead + tied/2.0f) / (double) (ahead + tied + behind);
 
-    System.out.println("HandStrength: " + ahead + " " + tied + " " + behind + " " + count);
+    System.out.println("HandStrength: " + handStrength + " " + count);
 
     return handStrength;
   }
