@@ -69,7 +69,7 @@ public class PokerBot {
     try{
       if(fv.getFactSlot("move_type").toString().equals("fold")){
         gameState.aiMove.type = State.Type.FOLD;
-        gameState.aiMove.payload = Integer.parseInt(fv.getFactSlot("current_bet").toString());
+        gameState.aiMove.payload = (int) Double.parseDouble(fv.getFactSlot("current_bet").toString());
       }else if(fv.getFactSlot("move_type").toString().equals("check")){
         gameState.aiMove.type = State.Type.CHECK;
       }else if(fv.getFactSlot("move_type").toString().equals("call")){
@@ -84,7 +84,12 @@ public class PokerBot {
     }catch(Exception e){
       System.out.println("");
       System.out.println("FUCKK!!!!");
-      System.out.println(e.getStackTrace());
+      // System.out.println(e.getStackTrace().getFileName() + " " +
+      //                    e.getStackTrace().getClassName() + " " +
+      //                    e.getStackTrace().getMethodName() + " " +
+      //                    e.getStackTrace().getLineNumber()
+      // );
+      System.out.println(e.getMessage());
     }
     return gameState;
   }
