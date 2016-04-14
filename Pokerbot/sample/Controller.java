@@ -1,11 +1,15 @@
 package sample;
 
+import java.io.File;
+
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -31,6 +35,19 @@ public class Controller {
     public Button startGameButton;
     public Label playerPotLabel;
     public Label aiPotLabel;
+
+    public ImageView publicCard1;
+    public ImageView publicCard2;
+    public ImageView publicCard3;
+    public ImageView publicCard4;
+    public ImageView publicCard5;
+
+    public ImageView playerCard1;
+    public ImageView playerCard2;
+
+    public ImageView aiCard1;
+    public ImageView aiCard2;
+
     public PokerProbability probCalc = new PokerProbability();
     private static final int BLIND = 2;
 
@@ -181,6 +198,7 @@ public class Controller {
         }
 
         if(this.state.gameState != State.GameState.GAMEOVER){
+            displayCards(false);
             try{
                 handLabel.setText(this.state.playerCard[0].toString() + "," +  this.state.playerCard[1].toString());
             }catch(Exception e){
@@ -200,6 +218,8 @@ public class Controller {
             raiseButton.setDisable(!this.state.turn);
             callButton.setDisable(!this.state.turn);
             foldButton.setDisable(!this.state.turn);
+        }else{
+            displayCards(true);
         }
         startGameButton.setDisable(this.state.gameState != State.GameState.GAMEOVER);
     }
@@ -244,6 +264,58 @@ public class Controller {
         renderState();
     }
 
+    public void displayCards(boolean showAiCards){
+        if(this.state.river.size() >= 1){
+            File file = new File("card_images/" + this.state.river.get(0).getPath());
+            Image image = new Image(file.toURI().toString());
+            publicCard1.setImage(image);
+        }
+        if(this.state.river.size() >= 2){
+            File file = new File("card_images/" + this.state.river.get(1).getPath());
+            Image image = new Image(file.toURI().toString());
+            publicCard2.setImage(image);
+        }
+        if(this.state.river.size() >= 3){
+            File file = new File("card_images/" + this.state.river.get(2).getPath());
+            Image image = new Image(file.toURI().toString());
+            publicCard3.setImage(image);
+        }
+        if(this.state.river.size() >= 4){
+            File file = new File("card_images/" + this.state.river.get(3).getPath());
+            Image image = new Image(file.toURI().toString());
+            publicCard4.setImage(image);
+        }
+        if(this.state.river.size() >= 5){
+            File file = new File("card_images/" + this.state.river.get(4).getPath());
+            Image image = new Image(file.toURI().toString());
+            publicCard5.setImage(image);
+        }
+
+        if(this.state.playerCard.length >= 1){
+            File file = new File("card_images/" + this.state.playerCard[0].getPath());
+            Image image = new Image(file.toURI().toString());
+            playerCard1.setImage(image);
+        }
+        if(this.state.playerCard.length >= 2){
+            File file = new File("card_images/" + this.state.playerCard[1].getPath());
+            Image image = new Image(file.toURI().toString());
+            playerCard2.setImage(image);
+        }
+
+        if(!showAiCards) return;
+
+        if(this.state.aiCard.length >= 1){
+            File file = new File("card_images/" + this.state.aiCard[0].getPath());
+            Image image = new Image(file.toURI().toString());
+            aiCard1.setImage(image);
+        }
+        if(this.state.aiCard.length >= 2){
+            File file = new File("card_images/" + this.state.aiCard[1].getPath());
+            Image image = new Image(file.toURI().toString());
+            aiCard2.setImage(image);
+        }
+    }
+
     public void persistAiMove(){
         switch(this.state.aiMove.type){
             case RAISE: {
@@ -266,6 +338,17 @@ public class Controller {
         this.state.playerCard = new Card[2];
         this.state.aiCard = new Card[2];
         this.state.river = new ArrayList<>();
+
+        File file = new File("card_images/empty_card.png");
+        Image image = new Image(file.toURI().toString());
+        publicCard1.setImage(image);
+        publicCard2.setImage(image);
+        publicCard3.setImage(image);
+        publicCard4.setImage(image);
+        publicCard5.setImage(image);
+
+        aiCard1.setImage(image);
+        aiCard2.setImage(image);
     }
 
     public boolean isPlayerWinner(){

@@ -55,6 +55,13 @@ public class Card implements Comparable<Card>{
             location);
     }
 
+    public String getPath(){
+        return String.format("%s_of_%s.png",
+            Value.asFilenameFragment(this.v),
+            Suite.asFilenameFragment(this.s)
+        );
+    }
+
     public int getValue() {
         return Value.value(v) * 4 + Suite.value(s);
     }
