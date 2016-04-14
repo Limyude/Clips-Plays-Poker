@@ -67,9 +67,10 @@ public class PokerBot {
         gameState.aiMove.type = State.Type.CHECK;
       }else if(fv.getFactSlot("move_type").toString().equals("call")){
         gameState.aiMove.type = State.Type.CALL;
-        gameState.aiMove.payload = Integer.parseInt(fv.getFactSlot("current_bet").toString());
+        gameState.aiMove.payload = (int) Double.parseDouble(fv.getFactSlot("current_bet").toString());
       }else if( fv.getFactSlot("move_type").toString().equals("raise") ||
-                fv.getFactSlot("move_type").toString().equals("bet")){
+                fv.getFactSlot("move_type").toString().equals("bet") ||
+                fv.getFactSlot("move_type").toString().equals("all-in") ){
         gameState.aiMove.type = State.Type.RAISE;
         gameState.aiMove.payload = (int) Double.parseDouble(fv.getFactSlot("current_bet").toString());
       }

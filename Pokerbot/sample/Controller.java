@@ -233,10 +233,15 @@ public class Controller {
             raiseButton.setDisable(!this.state.turn);
             callButton.setDisable(!this.state.turn);
             foldButton.setDisable(!this.state.turn);
+            startGameButton.setDisable(true);
         }else{
+            startGameButton.setDisable(false);
+            checkButton.setDisable(true);
+            raiseButton.setDisable(true);
+            callButton.setDisable(true);
+            foldButton.setDisable(true);
             displayCards(true);
         }
-        startGameButton.setDisable(this.state.gameState != State.GameState.GAMEOVER);
     }
 
     public void startGame(ActionEvent actionEvent) {
@@ -244,6 +249,10 @@ public class Controller {
         System.out.println("STARTING NEW GAME");
         System.out.println("=================");
         System.out.println();
+        checkButton.setDisable(false);
+        raiseButton.setDisable(false);
+        callButton.setDisable(false);
+        foldButton.setDisable(false);
         ArrayList<Card> cards = new ArrayList<Card>();
         BlockingQueue<Card> deck = new ArrayBlockingQueue<Card>(52);
 
@@ -269,6 +278,11 @@ public class Controller {
             this.state.aiCard[1] = deck.take();
         }catch(Exception e){ System.out.print(e.getStackTrace());}
 
+        if(this.state.playerStack < 2 || this.state.aiStack < 2){
+            System.out.println("Resetting Player and AI stacks...");
+            this.state.playerStack = 1000;
+            this.state.aiStack = 1000;
+        }
         this.state.deck = deck;
         this.state.gameState = State.GameState.PREFLOP;
         this.state.aiStack -= BLIND;
