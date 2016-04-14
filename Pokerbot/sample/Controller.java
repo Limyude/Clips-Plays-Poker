@@ -31,6 +31,7 @@ public class Controller {
     public Button startGameButton;
     public Label playerPotLabel;
     public Label aiPotLabel;
+    public PokerProbability probCalc = new PokerProbability();
     private static final int BLIND = 2;
 
     private PokerBot bot = new PokerBot("PokerBot.clp");
@@ -71,6 +72,8 @@ public class Controller {
             this.state.deck.take();
             this.state.river.add(this.state.deck.take());
         }catch(Exception e){ System.out.println(e); }
+        // Calculate Winning Probabilities
+        calcWinProbabilities();
         this.state.gameState = State.GameState.FLOP;
         getAiAction(this.state);
         persistAiMove();
@@ -82,6 +85,8 @@ public class Controller {
             this.state.deck.take();
             this.state.river.add(this.state.deck.take());
         }catch(Exception e){ System.out.println(e); }
+        // Calculate Winning Probabilities
+        calcWinProbabilities();
         this.state.gameState = State.GameState.TURN;
         getAiAction(this.state);
         persistAiMove();
@@ -93,6 +98,8 @@ public class Controller {
             this.state.deck.take();
             this.state.river.add(this.state.deck.take());
         }catch(Exception e){ System.out.println(e); }
+        // Calculate Winning Probabilities
+        calcWinProbabilities();
         this.state.gameState = State.GameState.RIVER;
         getAiAction(this.state);
         persistAiMove();
@@ -133,6 +140,11 @@ public class Controller {
         renderState();
         this.state.gameState = State.GameState.GAMEOVER;
         renderState();
+    }
+
+    public void calcWinProbabilities(){
+        this.state.playerWinProbability = probCalc.calculateWinningProbability(this.state.playerCard, this.state.river, 1);
+        this.state.aiWinProbability = probCalc.calculateWinningProbability(this.state.aiCard, this.state.river, 1);
     }
 
     public State getAiAction(State state){
@@ -207,6 +219,7 @@ public class Controller {
         this.state.playerStack -= BLIND;
         this.state.aiPot = BLIND;
         this.state.playerPot = BLIND;
+
         getAiAction(this.state);
         persistAiMove();
         this.state.turn = true;

@@ -91,10 +91,11 @@ public class PokerBot {
 
   // CLIPS Facts
   private void assertFacts(State gameState){
-    String selfFact = String.format("(self (player_id 0) (name \"%s\") (money %.2f) (bet %.2f) (position 0))",
+    String selfFact = String.format("(self (player_id 0) (name \"%s\") (money %f) (bet %f) (position 0) (win_probability %f))",
       name,
       (double) gameState.aiStack,
-      (double) gameState.aiPot
+      (double) gameState.aiPot,
+      (double) gameState.aiWinProbability
     );
     String playerLastMove = "";
     switch(gameState.lastMove.type){
@@ -115,7 +116,7 @@ public class PokerBot {
         playerLastMove = "fold";
         break;
     }
-    String playerFact = String.format("(player (player_id 1) (name \"Player 1\") (money %.2f) (bet %.2f) (position 1) (move %s))",
+    String playerFact = String.format("(player (player_id 1) (name \"Player 1\") (money %f) (bet %f) (position 1) (move %s))",
       (double) gameState.playerStack,
       (double) gameState.playerPot,
       playerLastMove
@@ -135,7 +136,7 @@ public class PokerBot {
         round = 3;
         break;
     }
-    String gameStateFact = String.format("(game (round %d) (pot %.2f) (current_bet %.2f) (min_allowed_bet %.2f) )",
+    String gameStateFact = String.format("(game (round %d) (pot %f) (current_bet %f) (min_allowed_bet %f) )",
       round,
       (double) (gameState.playerPot + gameState.aiPot),
       (double) (gameState.playerPot > gameState.aiPot ? gameState.playerPot : gameState.aiPot),

@@ -20,6 +20,11 @@
 (defglobal ?*INDUCEFOLDS_STRATEGY* = induce-folds)					; moves to take: bluff (like when playing against a possibly weak marginal hand with an air hand)
 (defglobal ?*INDUCEBETS_STRATEGY* = induce-bets)					; moves to take: value bet/check (like when against an air hand)
 
+; ; WIN PROBABILITY THRESHOLD CONSTANTS
+(defglobal ?*WINPROB_THRESHOLD_CUTLOSSES* = 0.3)		; below 0.3, always cut losses
+(defglobal ?*WINPROB_THRESHOLD_DEFENSIVE* = 0.4)		; (0.3, 0.4] & have raisers, defensive
+(defglobal ?*WINPROB_THRESHOLD_INDUCEBETS* = 0.7)		; above 0.7, always induce bets
+
 ; ; TYPE OF HAND CONSTANTS
 (defglobal ?*AIR_HAND* = air-hand)
 (defglobal ?*MARGINAL_HAND* = marginal-hand)
@@ -147,6 +152,7 @@
 	(slot position (type INTEGER) (default 0))			; Position in the round of betting (should be unique)
 	(slot position_type (type SYMBOL))					; Position type (early/mid/late/sb/bb)
 	(slot hand_type (type SYMBOL))						; Hand type (AA, KK, QQ, AKs, AKo, etc.)
+	(slot win_probability (type FLOAT) (default -1.0))	; Calculated probability of winning the game
 	(slot strategy (type SYMBOL)))						; the strategy being adopted by myself
 
 
@@ -244,7 +250,7 @@
 ; 	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
 ; 	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
 ; 	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
-; 	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+; 	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3) (win_probability 0.5)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
 ; 	(player (player_id 1) (name "Bad Guy 4") (money 13.37) (bet 0.0) (position 4) (move nil))
 ; 	(player (player_id 3) (name "Bad Guy 5") (money 40.0) (bet 0.0) (position 5) (move nil))
 ; 	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 6) (move nil))
@@ -252,7 +258,7 @@
 ; 	(player (player_id 8) (name "Bad Guy 8") (money 40.0) (bet 0.0) (position 8) (move nil))
 ; 	(player (player_id 9) (name "Bad Guy 9") (money 40.0) (bet 0.0) (position 9) (move nil))
 ; 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-; 	(game (round 1) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0))); ; ; ; ; ; ; ; ; ; ; ; ; ;
+; 	(game (round 3) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0))); ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; MOVE-SELECTION MODULE ;
@@ -1949,31 +1955,125 @@
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
 
+
+
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Strategy selection during the FLOP;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::select-strategy-flop-induce-bets
+	(game (round 1))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(> ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-cut-losses
+	(game (round 1))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
+																(< ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
+																(>= ?win_prob 0.0))))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-continuation-bet
+	(game (round 1))
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or (eq ?prev_strat ?*INDUCEBETS_STRATEGY*) (eq ?prev_strat ?*INDUCEFOLDS_STRATEGY*))))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)))
+	=>
+	(modify ?self (strategy ?prev_strat)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-bluff
+	(game (round 1))
+	(previous_strategy (prev_round 0|1) (prev_strat ?prev_strat&:(or
+													(eq ?prev_strat ?*CUTLOSSES_STRATEGY*)
+													(eq ?prev_strat ?*DEFENSIVE_STRATEGY*))))
+	(num_raisers ?nr)
+	?self <- (self (strategy nil) (win_probability ?win_prob))
+	(or
+		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*) (<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*) (< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
+			(eq ?nr 0))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-flop-defensive
+	(game (round 1))
+	(num_raisers ?nr&:(> ?nr 0))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
+																(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
+																(< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*))))
+	=>
+	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
+
+
+
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; Strategy selection during the RIVER;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+(defrule STRATEGY-SELECTION::select-strategy-river-induce-bets
+	(game (round 3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(> ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
+	=>
+	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
+(defrule STRATEGY-SELECTION::select-strategy-river-bluff
+	(game (round 3))
+	(previous_strategy (prev_round ~3))
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
+																(> ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
+																(<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*))))
+	=>
+	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
+
+
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Set strategy to defaults;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
+(defrule STRATEGY-SELECTION::select-strategy-river-default
+	(declare (salience -9))		; ; important to cut losses on river as a default
+	(game (round 3))
+	?self <- (self (strategy nil))
+	=>
+	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+
 ; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
 (defrule STRATEGY-SELECTION::select-strategy-preflop-default
-	(declare (salience -1))			; ; Only set default if no other rule set it
+	(declare (salience -10))			; ; Only set default if no other rule set it
 	(game (round 0))
 	?self <- (self (strategy nil))
 	=>
 	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 
+
+
+; ; If postflop but have no strategy chosen, follow the previous strategy if there is one
+(defrule STRATEGY-SELECTION::select-strategy-postflop-default-previous-strategy
+	(declare (salience -10))
+	(game (round ?cur_round&:(>= ?cur_round 1)))
+	?self <- (self (strategy nil))
+	(previous_strategy (prev_round ?prev_round&:(or
+													(eq ?prev_round (- ?cur_round 1)) (eq ?prev_round ?cur_round)))
+													(prev_strat ?prev_strat))
+	=>
+	(modify ?self (strategy ?prev_strat)))
 ; ; If postflop but have no strategy chosen, pick defensive
 (defrule STRATEGY-SELECTION::select-strategy-postflop-default
-	(declare (salience -1))			; ; Only set default if no other rule set it
+	(declare (salience -11))			; ; Only set default if no other rule set it
 	(game (round ?r&:(>= ?r 1)))
 	?self <- (self (strategy nil))
 	=>
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
 
+
+
 ; ; Print out the strategy we are using to select a move
 (defrule STRATEGY-SELECTION::print-strategy-used
-	(declare (salience -1))
+	(declare (salience -100))
 	(not (printed_strategy))
 	(self (strategy ?strat&~nil))
 	=>
@@ -2005,14 +2105,6 @@
 		(assert-string ?line))
 	(close rf))
 
-(defrule STRATEGY-SELECTION::set-current-strategy-to-previous-strategy
-	(declare (salience 1))
-	(game (round ?cur_round))
-	(previous_strategy (prev_round ?prev_round&:(eq ?prev_round (- ?cur_round 1))) (prev_strat ?prev_strat))
-	?self <- (self (strategy nil))
-	=>
-	(modify ?self (strategy ?prev_strat)))
-
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Write the chosen strategy to file   ;
@@ -2022,7 +2114,7 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 (defrule STRATEGY-SELECTION::write-strategy-to-file
-	(declare (salience -1))
+	(declare (salience -100))
 	(not (wrote_strategy_to_file))
 	(game (round ?cur_round))
 	(self (strategy ?strat&~nil))

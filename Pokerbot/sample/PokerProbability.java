@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class PokerProbability {
 
   private static final int HAND_RANK_SIZE   = 32487834;
-  private static final String HAND_RANK_FILE  = "HandRanks.dat";
+  private static final String HAND_RANK_FILE  = "sample/HandRanks.dat";
 
   private static final int AHEAD        = 0;
   private static final int TIED       = 1;
@@ -298,7 +298,6 @@ public class PokerProbability {
     int tableSize = HAND_RANK_SIZE * 4;
     byte[] bTable = new byte[tableSize];
     BufferedInputStream br = null;
-
     try {
       br = new BufferedInputStream(new FileInputStream(HAND_RANK_FILE));
       int bytesRead = br.read(bTable, 0, tableSize);

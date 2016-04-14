@@ -60,4 +60,5 @@ public class State {
     public int aiStack = 1000;
     public Move lastMove;
     public Move aiMove;
+    public double playerWinProbability = 0, aiWinProbability = 0;
 }
