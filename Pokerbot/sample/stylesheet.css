@@ -1,0 +1,6 @@
+#pane{
+    -fx-background-image: url("../card_images/poker_table.png");
+    -fx-background-size: 895 434;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}

@@ -5,9 +5,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
-      <Pane prefHeight="700.0" prefWidth="800.0">
+      <Pane id="pane" prefHeight="700.0" prefWidth="900.0">
          <children>
             <Button fx:id="checkButton" layoutX="36.0" layoutY="621.0" mnemonicParsing="false" onAction="#check" prefHeight="37.0" prefWidth="125.0" text="Check" />
             <Button fx:id="raiseButton" layoutX="195.0" layoutY="621.0" mnemonicParsing="false" onAction="#raise" prefHeight="37.0" prefWidth="125.0" text="Raise" />
