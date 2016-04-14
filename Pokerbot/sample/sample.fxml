@@ -76,7 +76,7 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label layoutX="21.0" layoutY="33.0" prefHeight="37.0" prefWidth="116.0" text="Player" textAlignment="CENTER">
+            <Label layoutX="21.0" layoutY="33.0" prefHeight="37.0" prefWidth="116.0" style="-fx-font-weight: bold;" text="Player" textAlignment="CENTER">
                <font>
                   <Font name="Consolas" size="30.0" />
                </font>
@@ -86,12 +86,12 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label fx:id="aiPotLabel" layoutX="813.0" layoutY="322.0" prefHeight="37.0" prefWidth="33.0" text="0$" textAlignment="RIGHT" textFill="WHITE">
+            <Label fx:id="aiPotLabel" layoutX="792.0" layoutY="311.0" prefHeight="37.0" prefWidth="54.0" text="0$" textFill="WHITE">
                <font>
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label layoutX="944.0" layoutY="33.0" prefHeight="37.0" prefWidth="30.0" text="AI" textAlignment="RIGHT">
+            <Label layoutX="944.0" layoutY="33.0" prefHeight="37.0" prefWidth="30.0" style="-fx-font-weight: bold;" text="AI" textAlignment="RIGHT">
                <font>
                   <Font name="Consolas" size="30.0" />
                </font>
