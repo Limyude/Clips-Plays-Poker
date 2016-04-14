@@ -29,4 +29,14 @@ public enum Suite {
             default: return -1;
         }
     }
+
+    public static String asFilenameFragment(Suite s){
+        switch(s){
+            case CLUB:  return "clubs";
+            case DIAMOND: return "diamonds";
+            case HEART: return "hearts";
+            case SPADE: return "spades";
+            default: return "";
+        }
+    }
 }
