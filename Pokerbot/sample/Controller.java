@@ -74,7 +74,7 @@ public class Controller {
             alert.showAndWait();
         }else{
             this.state.lastMove.type = State.Type.CHECK;
-            this.state.lastMove.payload = amount;
+            this.state.lastMove.payload = (int) amount;
             this.state.playerStack -= amount;
             this.state.playerPot += amount;
             this.state.lastMove.type = State.Type.RAISE;
@@ -258,6 +258,10 @@ public class Controller {
             callButton.setDisable(true);
             foldButton.setDisable(true);
             displayCards(true);
+            playerActionLabel.setText("");
+            playerActionPayroll.setText("");
+            aiActionLabel.setText("");
+            aiActionPayroll.setText("");
         }
     }
 
