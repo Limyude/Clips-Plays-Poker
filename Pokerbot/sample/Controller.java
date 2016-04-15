@@ -21,20 +21,18 @@ import java.util.stream.Collectors;
 import sample.PokerBot;
 
 public class Controller {
+    public Label playerStackLabel;
+    public Label aiStackLabel;
+    public Label playerPotLabel;
+    public Label aiPotLabel;
+    public Label tablePotLabel;
 
-    public TextField raiseAmount;
-    public Label handLabel;
-    public Label stackLabel;
-    public Label riverLabel;
-    public Label turnLabel;
     public State state = new State();
     public Button checkButton;
     public Button raiseButton;
     public Button callButton;
     public Button foldButton;
     public Button startGameButton;
-    public Label playerPotLabel;
-    public Label aiPotLabel;
 
     public ImageView publicCard1;
     public ImageView publicCard2;
@@ -64,7 +62,7 @@ public class Controller {
     }
 
     public void raise(ActionEvent actionEvent) {
-        double amount = Double.parseDouble(raiseAmount.getText());
+        double amount = BLIND*10;
         if(amount > this.state.playerStack){
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Um...");
@@ -214,20 +212,23 @@ public class Controller {
 
         if(this.state.gameState != State.GameState.GAMEOVER){
             displayCards(false);
-            try{
-                handLabel.setText(this.state.playerCard[0].toString() + "," +  this.state.playerCard[1].toString());
-            }catch(Exception e){
-                handLabel.setText("");
-            }
-            stackLabel.setText(this.state.playerStack + "");
-            riverLabel.setText(
-                    this.state.river.stream()
-                            .map( c -> c.toString() )
-                            .collect(Collectors.joining(","))
-            );
-            turnLabel.setText(this.state.turn ? "Your turn" : "AI Turn");
-            playerPotLabel.setText(this.state.playerPot + "");
-            aiPotLabel.setText(this.state.aiPot + "");
+            // try{
+            //     handLabel.setText(this.state.playerCard[0].toString() + "," +  this.state.playerCard[1].toString());
+            // }catch(Exception e){
+            //     handLabel.setText("");
+            // }
+            playerStackLabel.setText(this.state.playerStack + "");
+            aiStackLabel.setText(this.state.aiStack + "");
+            // riverLabel.setText(
+            //         this.state.river.stream()
+            //                 .map( c -> c.toString() )
+            //                 .collect(Collectors.joining(","))
+            // );
+            playerPotLabel.setText("$" + this.state.playerPot);
+            aiPotLabel.setText("$" + this.state.aiPot);
+            int totalPot = this.state.playerPot + this.state.aiPot;
+            tablePotLabel.setText("POT: $" + totalPot);
+
 
             checkButton.setDisable(this.state.aiMove.type != State.Type.CHECK);
             raiseButton.setDisable(!this.state.turn);
@@ -235,6 +236,9 @@ public class Controller {
             foldButton.setDisable(!this.state.turn);
             startGameButton.setDisable(true);
         }else{
+            playerPotLabel.setText("$0");
+            aiPotLabel.setText("$0");
+            tablePotLabel.setText("");
             startGameButton.setDisable(false);
             checkButton.setDisable(true);
             raiseButton.setDisable(true);

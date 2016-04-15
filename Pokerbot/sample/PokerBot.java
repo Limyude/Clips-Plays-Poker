@@ -57,9 +57,9 @@ public class PokerBot {
     System.out.println("Finding Best Play...");
     clips.run();
     String evalStr = "(find-fact ((?f move)) TRUE)";
-    FactAddressValue fv = (FactAddressValue) ((MultifieldValue) clips.eval(evalStr)).get(0);
     gameState.aiMove.type = State.Type.FOLD;
     try{
+      FactAddressValue fv = (FactAddressValue) ((MultifieldValue) clips.eval(evalStr)).get(0);
       if(fv.getFactSlot("move_type").toString().equals("fold")){
         gameState.aiMove.type = State.Type.FOLD;
         gameState.aiMove.payload = (int) Double.parseDouble(fv.getFactSlot("current_bet").toString());
@@ -77,7 +77,7 @@ public class PokerBot {
       System.out.println("DONE.");
     }catch(Exception e){
       System.out.println("");
-      System.out.println("FUCKK!!!!");
+      System.out.println("FUCKK &%$$^%*&*%!!!!");
       System.out.println(e.getMessage());
     }
     System.out.println("----------------------------");

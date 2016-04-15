@@ -23,7 +23,6 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
         // scene.getStylesheets().addAll(this.getClass().getResource("stylesheet.css").toExternalForm());
-        primaryStage.setTitle("Poker Bot");
         Scene scene = new Scene(root, 1000, 650);
         primaryStage.setScene(scene);
         primaryStage.setTitle("CLIPS Plays Poker - Interface");

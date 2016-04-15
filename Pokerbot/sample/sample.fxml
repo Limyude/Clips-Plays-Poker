@@ -71,7 +71,7 @@
                   <Image url="@../card_images/empty_card.png" />
                </image>
             </ImageView>
-            <Label fx:id="tablePot" layoutX="470.0" layoutY="208.0" prefHeight="37.0" prefWidth="92.0" text="Label" textAlignment="CENTER" textFill="WHITE">
+            <Label fx:id="tablePotLabel" layoutX="470.0" layoutY="208.0" prefHeight="37.0" prefWidth="142.0" text="" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font name="Consolas" size="24.0" />
                </font>
@@ -101,7 +101,7 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            
+
          </children>
       </Pane>
    </children>
