@@ -38,8 +38,7 @@
     -fx-background-size: 281 57;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
-    -fx-border-style: none;
-    -fx-border-color: none;
+    -fx-border-width: 0;
 }
 
 #playerPane {
@@ -47,5 +46,13 @@
     -fx-background-size: 100% 100%;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
+}
+
+#aiPotLabel {
+    -fx-text-alignment: right;
+}
+
+#aiActionLabel {
+    -fx-text-alignment: right;
 }
 
