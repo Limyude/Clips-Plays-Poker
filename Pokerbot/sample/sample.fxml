@@ -100,17 +100,27 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label fx:id="playerActionLabel" layoutX="27.0" layoutY="159.0" text="Action" textFill="RED">
+            <Label fx:id="playerActionLabel" layoutX="27.0" layoutY="159.0" style="-fx-font-weight: bold;" text="" textFill="RED">
                <font>
                   <Font name="Consolas" size="20.0" />
                </font>
             </Label>
-            <Label fx:id="aiActionLabel" id="aiActionLabel" layoutX="885.0" layoutY="159.0" prefHeight="23.0" prefWidth="92.0" text="Action" textFill="RED">
+            <Label id="aiActionLabel" fx:id="aiActionLabel" layoutX="904.0" layoutY="159.0" prefHeight="23.0" prefWidth="70.0" style="-fx-font-weight: bold;" text="" textFill="RED">
                <font>
                   <Font name="Consolas" size="20.0" />
                </font>
             </Label>
             <Button id="startGameButton" fx:id="startGameButton" layoutX="360.0" layoutY="584.0" mnemonicParsing="false" onAction="#startGame" prefHeight="55" prefWidth="280" />
+            <Label fx:id="playerActionPayroll" layoutX="27.0" layoutY="182.0" text="" textFill="RED">
+               <font>
+                  <Font name="Consolas" size="16.0" />
+               </font>
+            </Label>
+            <Label fx:id="aiActionPayroll" layoutX="915.0" layoutY="182.0" prefHeight="23.0" prefWidth="59.0" text="" textFill="RED">
+               <font>
+                  <Font name="Consolas" size="16.0" />
+               </font>
+            </Label>
 
          </children>
       </Pane>

@@ -26,6 +26,10 @@ public class Controller {
     public Label playerPotLabel;
     public Label aiPotLabel;
     public Label tablePotLabel;
+    public Label playerActionLabel;
+    public Label aiActionLabel;
+    public Label playerActionPayroll;
+    public Label aiActionPayroll;
 
     public State state = new State();
     public Button checkButton;
@@ -217,8 +221,8 @@ public class Controller {
             // }catch(Exception e){
             //     handLabel.setText("");
             // }
-            playerStackLabel.setText(this.state.playerStack + "");
-            aiStackLabel.setText(this.state.aiStack + "");
+            playerStackLabel.setText(this.state.playerStack + "$");
+            aiStackLabel.setText(this.state.aiStack + "$");
             // riverLabel.setText(
             //         this.state.river.stream()
             //                 .map( c -> c.toString() )
@@ -229,6 +233,10 @@ public class Controller {
             int totalPot = this.state.playerPot + this.state.aiPot;
             tablePotLabel.setText("POT: $" + totalPot);
 
+            playerActionLabel.setText(this.state.lastMove.getType());
+            playerActionPayroll.setText(this.state.lastMove.getPayroll());
+            aiActionLabel.setText(this.state.aiMove.getType());
+            aiActionPayroll.setText(this.state.aiMove.getPayroll());
 
             checkButton.setDisable(this.state.aiMove.type != State.Type.CHECK);
             raiseButton.setDisable(!this.state.turn);
