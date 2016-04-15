@@ -4,3 +4,48 @@
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
 }
+
+#checkButton {
+    -fx-background-image: url("../card_images/check.png");
+    -fx-background-size: 118 50;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+#foldButton {
+    -fx-background-image: url("../card_images/fold.png");
+    -fx-background-size: 118 50;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+#callButton {
+    -fx-background-image: url("../card_images/call.png");
+    -fx-background-size: 118 50;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+#raiseButton {
+    -fx-background-image: url("../card_images/raise.png");
+    -fx-background-size: 118 50;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+#startGameButton {
+    -fx-background-image: url("../card_images/start_game.png");
+    -fx-background-size: 281 57;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+    -fx-border-style: none;
+    -fx-border-color: none;
+}
+
+#playerPane {
+    -fx-background-image: url("../card_images/player_frame.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+

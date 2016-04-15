@@ -22,8 +22,9 @@ public class Main extends Application {
         // Create a deck of cards
         FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 950, 700);
-        scene.getStylesheets().addAll(this.getClass().getResource("stylesheet.css").toExternalForm());
+        // scene.getStylesheets().addAll(this.getClass().getResource("stylesheet.css").toExternalForm());
+        primaryStage.setTitle("Poker Bot");
+        Scene scene = new Scene(root, 1000, 650);
         primaryStage.setScene(scene);
         primaryStage.setTitle("CLIPS Plays Poker - Interface");
         primaryStage.show();
