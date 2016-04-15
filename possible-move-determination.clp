@@ -14,63 +14,71 @@
 
 ; ; Determine if can play fold (can ALWAYS fold)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-fold
+	(not (can_fold))
 	=>
 	(printout t "Found: can_fold" crlf)
 	(assert (can_fold)))
 
 ; ; Determine if can play check
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-check
+	(not (can_check))
 	(game (current_bet 0.0))		; ; We can only check if nobody has yet placed a bet
 	=>
-	(printout t "Found: can_check")
+	(printout t "Found: can_check" crlf)
 	(assert (can_check)))
 	
 ; ; Determine if can play all-in (can ALWAYS all-in)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-all-in
+	(not (can_all_in))
 	=>
-	(printout t "Found: can_all_in")
+	(printout t "Found: can_all_in" crlf)
 	(assert (can_all_in)))
 
 ; ; Determine if can play bet
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-bet
+	(not (can_bet))
 	(game (current_bet 0.0) (min_allowed_bet ?minbet))		; ; We can only bet if nobody has yet placed a bet
 	(self (money ?money&:(>= ?money ?minbet)))				; ; We must have enough money to play at least the minimum bet
 	=>
-	(printout t "Found: can_bet")
+	(printout t "Found: can_bet" crlf)
 	(assert (can_bet)))
 	
 ; ; Determine if can play small bet (small bet is currently defined as min_allowed_bet)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-bet
+	(not (can_small_bet))
 	(can_bet)						; ; Obviously, to be able to do a small bet we must first satisfy the weaker condition of being able to do a bet
 	(game (min_allowed_bet ?minbet))
 	(self (money ?mymoney&:(>= ?mymoney ?minbet)))
 	=>
-	(printout t "Found: can_small_bet")
+	(printout t "Found: can_small_bet" crlf)
 	(assert (can_small_bet)))
 
 ; ; Determine if can play call
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-call
+	(not (can_call))
 	(game (current_bet ?current_bet&:(> ?current_bet 0.0)))	; ; We can only call if there has been a bet
 	(self (money ?money&:(>= ?money ?current_bet)))			; ; We must have enough money to call the bet
 	=>
-	(printout t "Found: can_call")
+	(printout t "Found: can_call" crlf)
 	(assert (can_call)))
 	
 ; ; Determine if can play small call (small call is currently defined as <= 10% of player's money)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-call
+	(not (can_small_call))
 	(can_call)						; ; Obviously, to be able to do a small call we must first satisfy the weaker condition of being able to do a call
 	(game (current_bet ?current_bet))
 	(self (money ?mymoney&:(<= ?current_bet (* 0.1 ?mymoney))))	; ; The current bet to call is <= 10% of player's money
 	=>
-	(printout t "Found: can_small_call")
+	(printout t "Found: can_small_call" crlf)
 	(assert (can_small_call)))
 
 ; ; Determine if can play raise
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-raise
+	(not (can_raise))
 	(game (current_bet ?current_bet&:(> ?current_bet 0.0)) (min_allowed_bet ?min_allowed_bet))	; ; We can only raise if there has been a bet
 	(self (money ?money&:(>= (- ?money ?current_bet) ?min_allowed_bet)))	; ; We can only raise if we have sufficient money to raise the bet at least by the min_allowed_bet
 	=>
-	(printout t "Found: can_raise")
+	(printout t "Found: can_raise" crlf)
 	(assert (can_raise)))
 	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;

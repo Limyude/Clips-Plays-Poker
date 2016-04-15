@@ -6,6 +6,13 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 
+(defrule MOVE-SELECTION::print-my-money
+	(not (printed_my_money))
+	(self (money ?mymoney))
+	=>
+	(assert (printed_my_money))
+	(printout t "My money: $" ?mymoney crlf))
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Rules for selecting default move  ; 

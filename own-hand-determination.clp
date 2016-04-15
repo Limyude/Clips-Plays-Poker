@@ -273,7 +273,7 @@
 (defrule OWN-HAND-DETERMINATION::determine-handtype-54s
 	?self <- (self (hand_type nil))							; ; Determine hand type only once
 	(card (suit ?s) (value 5) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
-	(card (suit ?s) (value 5) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
+	(card (suit ?s) (value 4) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
 	=>
 	(modify ?self (hand_type ?*HAND_54s*))
 	(printout t "Hand is: 54s" crlf))
