@@ -24,7 +24,18 @@ public class State {
     }
 
     public enum Type {
-        CHECK, RAISE, CALL, FOLD
+        CHECK, RAISE, CALL, FOLD;
+
+        public String asString() {
+            switch(this) {
+                case CHECK: return "Check";
+                case RAISE: return "Raise";
+                case CALL: return "Call";
+                case FOLD: return "Fold";
+            }
+
+            return "";
+        }
     }
 
     public State(){
@@ -45,6 +56,14 @@ public class State {
         Move(Type t, int p){
             this.type = t;
             this.payload = p;
+        }
+
+        public String getType() {
+            return this.type.asString();
+        }
+
+        public String getPayroll() {
+            return this.payload == 0 ? "" : this.payload + "$";
         }
     }
 
