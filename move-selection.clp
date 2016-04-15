@@ -12,51 +12,38 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
-; ; Default move selection announcement (when no other strategy works, just check/call/all-in (in this order))
-(defrule MOVE-SELECTION::default-move-selection-announcement
-	(declare (salience -1))		; ; Default move selection should be done only after all else fails
-	(not (move))				; ; Got no moves asserted!
-	=>
-	(printout t "Performing default-move-selection because we could not perform any good move according to the rules!" crlf)
-	(assert (should_perform_default_move)))
-	
-; ; This rule is to retract the default move selection announcement (when we already have chosen a rule)
-(defrule MOVE-SELECTION::default-move-selection-announcement-retraction
-	(declare (salience -1))		; ; Default move selection should be retracted once there is a move so that we don't select more than 1 move
-	(move)
-	?announcement <- (should_perform_default_move)
-	=>
-	(retract ?announcement))
-
 ; ; Check happens before call/all-in
 (defrule MOVE-SELECTION::default-move-selection-check
-	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
-	(should_perform_default_move)		; ; Asserted by other rules
+	(declare (salience -2))				; ; default move should be low salience
+	(not (move))
 	(can_check)							; ; Asserted by other rules
 	=>
+	(printout t "Performing default-move-selection-check because we could not perform any good move according to the rules!" crlf)
 	(assert (move (move_type ?*CHECK*))))
 	
 ; ; Call happens if check could not happen
 (defrule MOVE-SELECTION::default-move-selection-call
 	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
-	(should_perform_default_move)		; ; Asserted by other rules
+	(not (move))
 	(can_call)							; ; Asserted by other rules
 	(not (can_check))					; ; Asserted by other rules
 	(game (current_bet ?current_bet))
 	?self <- (self)
 	=>
+	(printout t "Performing default-move-selection-call because we could not perform any good move according to the rules!" crlf)
 	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))
 	(modify ?self (bet ?current_bet)))
 
 ; ; All-in happens if both check and call could not happen
 (defrule MOVE-SELECTION::default-move-selection-all-in
 	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
-	(should_perform_default_move)		; ; Asserted by other rules
+	(not (move))
 	(can_all_in)						; ; Asserted by other rules
 	(not (can_check))					; ; Asserted by other rules
 	(not (can_call))					; ; Asserted by other rules
 	?self <- (self (money ?mymoney))
 	=>
+	(printout t "Performing default-move-selection-all-in because we could not perform any good move according to the rules!" crlf)
 	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 	(modify ?self (bet ?mymoney)))
 		
