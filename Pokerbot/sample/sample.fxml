@@ -25,7 +25,7 @@
             <Button id="raiseButton" fx:id="raiseButton" layoutX="22.0" layoutY="509.0" mnemonicParsing="false" onAction="#raise" prefHeight="45.0" prefWidth="108.0" />
             <Button id="callButton" fx:id="callButton" layoutX="156.0" layoutY="445.0" mnemonicParsing="false" onAction="#call" prefHeight="45.0" prefWidth="90.0" />
             <Button id="foldButton" fx:id="foldButton" layoutX="156.0" layoutY="509.0" mnemonicParsing="false" onAction="#fold" prefHeight="45.0" prefWidth="96.0" />
-            <Label fx:id="playerStackLabel" layoutX="22.0" layoutY="77.0" prefHeight="28.0" prefWidth="81.0" text="1000$">
+            <Label fx:id="playerStackLabel" layoutX="22.0" layoutY="94.0" prefHeight="28.0" prefWidth="81.0" text="1000$">
                <font>
                   <Font name="Consolas" size="24.0" />
                </font>
@@ -75,7 +75,7 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label layoutX="21.0" layoutY="33.0" prefHeight="37.0" prefWidth="116.0" style="-fx-font-weight: bold;" text="Player" textAlignment="CENTER">
+            <Label layoutX="21.0" layoutY="50.0" prefHeight="37.0" prefWidth="116.0" style="-fx-font-weight: bold;" text="Player" textAlignment="CENTER">
                <font>
                   <Font name="Consolas" size="30.0" />
                </font>
@@ -90,12 +90,12 @@
                   <Font name="Consolas" size="24.0" />
                </font>
             </Label>
-            <Label layoutX="944.0" layoutY="33.0" prefHeight="37.0" prefWidth="30.0" style="-fx-font-weight: bold;" text="AI" textAlignment="RIGHT">
+            <Label layoutX="944.0" layoutY="50.0" prefHeight="37.0" prefWidth="30.0" style="-fx-font-weight: bold;" text="AI" textAlignment="RIGHT">
                <font>
                   <Font name="Consolas" size="30.0" />
                </font>
             </Label>
-            <Label fx:id="aiStackLabel" layoutX="904.0" layoutY="77.0" prefHeight="28.0" prefWidth="70.0" text="1000$" textAlignment="RIGHT">
+            <Label fx:id="aiStackLabel" layoutX="904.0" layoutY="94.0" prefHeight="28.0" prefWidth="70.0" text="1000$" textAlignment="RIGHT">
                <font>
                   <Font name="Consolas" size="24.0" />
                </font>
@@ -119,6 +119,11 @@
             <Label fx:id="aiActionPayroll" layoutX="915.0" layoutY="182.0" prefHeight="23.0" prefWidth="59.0" text="" textFill="RED">
                <font>
                   <Font name="Consolas" size="16.0" />
+               </font>
+            </Label>
+            <Label layoutX="297.0" layoutY="6.0" text="CS4244 CLIPS Plays Poker">
+               <font>
+                  <Font name="Calibri" size="40.0" />
                </font>
             </Label>
 
