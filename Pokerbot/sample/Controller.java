@@ -69,6 +69,8 @@ public class Controller {
             alert.setHeaderText("You can only raise by upto $" + this.state.playerStack);
             alert.showAndWait();
         }else{
+            this.state.lastMove.type = State.Type.CHECK;
+            this.state.lastMove.payload = amount;
             this.state.playerStack -= amount;
             this.state.playerPot += amount;
             this.state.lastMove.type = State.Type.RAISE;
@@ -86,6 +88,7 @@ public class Controller {
         this.state.playerStack -= diff;
         this.state.playerPot += diff;
         this.state.lastMove.type = State.Type.CALL;
+        this.state.lastMove.payload = diff;
         switch(this.state.gameState){
             case PREFLOP : { dealFlop(); }; break;
             case FLOP : { dealTurn(); }; break;
@@ -180,6 +183,8 @@ public class Controller {
     }
 
     public void fold(ActionEvent actionEvent) {
+        this.state.lastMove.type = State.Type.FOLD;
+        this.state.lastMove.payload = 0;
         aiWins();
         renderState();
         this.state.gameState = State.GameState.GAMEOVER;
