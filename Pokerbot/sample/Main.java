@@ -20,9 +20,9 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         // Create a deck of cards
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        String pathToFxml = "resources/fxml/sample.fxml";
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(pathToFxml));
         Parent root = loader.load();
-        // scene.getStylesheets().addAll(this.getClass().getResource("stylesheet.css").toExternalForm());
         Scene scene = new Scene(root, 1000, 650);
         primaryStage.setScene(scene);
         primaryStage.setTitle("CLIPS Plays Poker - Interface");

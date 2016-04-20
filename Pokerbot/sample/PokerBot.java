@@ -45,7 +45,7 @@ public class PokerBot {
 
   public void loadResources(){
     // clips.load("PokerBot.clp");
-    clips.load("bot_files/ALL.clp");
+    clips.load("resources/bot_files/ALL.clp");
   }
 
   public State play(State gameState){

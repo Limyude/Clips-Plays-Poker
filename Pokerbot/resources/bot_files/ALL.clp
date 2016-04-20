@@ -110,8 +110,8 @@
 	(slot suit (type SYMBOL))
 	(slot value (type INTEGER))
 	(slot location (type SYMBOL)))	; ; Could be hole or board (use ?*LOCATION_HOLE* or ?*LOCATION_BOARD*)
-	
-	
+
+
 ; ; Move template
 ; ; Can be one of the following:
 ; ; 1) fold xx.xx (the amount to be paid off when folding)
@@ -124,7 +124,7 @@
 (deftemplate MAIN::move
 	(slot move_type (type SYMBOL) (default ?DERIVE))
 	(slot current_bet (type FLOAT) (default 0.0)))
-	
+
 
 ; ; Possible move templates
 (deftemplate MAIN::can_fold)
@@ -135,8 +135,8 @@
 (deftemplate MAIN::can_small_call)
 (deftemplate MAIN::can_raise)
 (deftemplate MAIN::can_all_in)
-	
-	
+
+
 ; ; Bet-sizing helper fact template
 (deftemplate MAIN::bet_sizing_help
 	(slot limpers (type INTEGER) (default -1))	; -1 signifies not yet counted
@@ -155,7 +155,7 @@
 	(slot win_probability (type FLOAT) (default -1.0))	; Calculated probability of winning the game
 	(slot strategy (type SYMBOL)))						; the strategy being adopted by myself
 
-	
+
 ; ; Player template (players other than myself)
 (deftemplate MAIN::player
 	(slot player_id (type INTEGER) (default 0)) 			; player id that should be unique
@@ -167,7 +167,7 @@
 	(slot position (type INTEGER) (default 0))				; Position in the round of betting (should be unique)
 	(slot move (type SYMBOL)))								; the move that was taken by the player
 
-	
+
 ; ; Players' move count template (for determining their playing styles)
 ; ; The facts of this template will be written into a file ?*PLAYER_MOVECOUNT_FILENAME*
 (deftemplate MAIN::player_move_count
@@ -177,7 +177,7 @@
 	(slot checks_calls (type INTEGER) (default 0))			; the number of checks/calls made by the player in all rounds
 	(slot bets_raises (type INTEGER) (default 0)))			; the number of bets/raises made by the player in all rounds
 
-	
+
 ; ; Game template (keeps the game information)
 (deftemplate MAIN::game
 	(slot round (type INTEGER) (default 0))					; the rounds are as follows: 0) pre-flop, 1) flop, 2) turn, 3) river (final round)
@@ -185,18 +185,18 @@
 	(slot current_bet (type FLOAT) (default 0.0))			; the current bet (amount every player must call, unless they do all-in)
 	(slot min_allowed_bet (type FLOAT) (default 1.0)))		; the minimum bet/raise allowed currently (raises must be at least as big as the previous raise; default sets the minimum starting bet for every betting roun)
 
-	
+
 ; ; The strongest player template (contains information filled in by CPP after evaluation of all players except itself)
 (deftemplate MAIN::strongest_player
 	(slot player_id (type INTEGER) (default 0))								; player id of the strongest player
 	(slot lose_to_cpp_probability (type FLOAT) (default 0.0))				; probability of the strongest player losing to me
 	(slot likely_type_of_hand (type SYMBOL) (default ?*MARGINAL_HAND*)))	; likely type of hand of the strongest player
-	
+
 ; ; Template used for storing the strategy used in the previous betting round
 (deftemplate MAIN::previous_strategy
 	(slot prev_round (type INTEGER) (default 0))
 	(slot prev_strat (type SYMBOL)))
-	
+
 
 
 
@@ -219,19 +219,19 @@
 
 
 
-	
+
 ; ; Control facts
 (deffacts MAIN::control
-	(module-sequence 
+	(module-sequence
 		OPPONENT-PLAYSTYLE-DETERMINATION
-		OPPONENT-HAND-DETERMINATION 
-		OWN-HAND-DETERMINATION 
+		OPPONENT-HAND-DETERMINATION
+		OWN-HAND-DETERMINATION
 		STRONGEST-OPPONENT-DETERMINATION
-		POSSIBLE-MOVE-DETERMINATION 
-		STRATEGY-SELECTION 
+		POSSIBLE-MOVE-DETERMINATION
+		STRATEGY-SELECTION
 		MOVE-SELECTION))
 
-	
+
 ; ; Control rule to change focus
 (defrule MAIN::change-focus
 	(declare (salience -1))		; ; Changing focus is least important
@@ -241,30 +241,30 @@
 	(focus ?next-module)
 	(retract ?list)
 	(assert (module-sequence $?other-modules)))
-	
-	
+
+
 ; ; The initial facts
-(deffacts MAIN::the-facts
-	(card (suit a) (value 5) (location ?*LOCATION_HOLE*))
-	(card (suit a) (value 4) (location ?*LOCATION_HOLE*))
-	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
-	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
-	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
-	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3) (win_probability 0.76)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
-	(player (player_id 1) (name "Bad Guy 4") (money 13.37) (bet 0.0) (position 4) (move nil))
-	(player (player_id 3) (name "Bad Guy 5") (money 40.0) (bet 0.0) (position 5) (move nil))
-	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 6) (move nil))
-	(player (player_id 7) (name "Bad Guy 7") (money 13.37) (bet 0.0) (position 7) (move nil))
-	(player (player_id 8) (name "Bad Guy 8") (money 40.0) (bet 0.0) (position 8) (move nil))
-	(player (player_id 9) (name "Bad Guy 9") (money 40.0) (bet 0.0) (position 9) (move nil))
-	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
-	(game (round 1) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0))); ; ; ; ; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; 	
-; ; ; ; ; ; ; ; ; ; ; ; ; ; 
-; ; MOVE-SELECTION MODULE ; 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; (deffacts MAIN::the-facts
+; 	(card (suit a) (value 5) (location ?*LOCATION_HOLE*))
+; 	(card (suit a) (value 4) (location ?*LOCATION_HOLE*))
+; 	(player (player_id 2) (name "Bad Guy 1") (money 23.35) (bet 1.0) (position 0) (move bet))
+; 	(player (player_id 4) (name "Bad Guy 2") (money 19.0) (bet 0.0) (position 1) (move fold))
+; 	(player (player_id 6) (name "Bad Guy 3") (money 19.0) (bet 0.0) (position 2) (move fold))
+; 	(self (player_id 0) (name "The Bot") (money 33.37) (bet 0.0) (position 3) (win_probability 0.76)) ; ; (strategy ?*INDUCEFOLDS_STRATEGY*))
+; 	(player (player_id 1) (name "Bad Guy 4") (money 13.37) (bet 0.0) (position 4) (move nil))
+; 	(player (player_id 3) (name "Bad Guy 5") (money 40.0) (bet 0.0) (position 5) (move nil))
+; 	(player (player_id 5) (name "Bad Guy 6") (money 40.0) (bet 0.0) (position 6) (move nil))
+; 	(player (player_id 7) (name "Bad Guy 7") (money 13.37) (bet 0.0) (position 7) (move nil))
+; 	(player (player_id 8) (name "Bad Guy 8") (money 40.0) (bet 0.0) (position 8) (move nil))
+; 	(player (player_id 9) (name "Bad Guy 9") (money 40.0) (bet 0.0) (position 9) (move nil))
+; 	(strongest_player (player_id 1) (lose_to_cpp_probability 0.0) (likely_type_of_hand ?*MARGINAL_HAND*))
+; 	(game (round 1) (pot 1.0) (current_bet 1.0) (min_allowed_bet 1.0))); ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; MOVE-SELECTION MODULE ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 (defrule MOVE-SELECTION::print-my-money
 	(not (printed_my_money))
@@ -275,7 +275,7 @@
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; Rules for selecting default move  ; 
+; ; Rules for selecting default move  ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
@@ -287,7 +287,7 @@
 	=>
 	(printout t "Performing default-move-selection-check because we could not perform any good move according to the rules!" crlf)
 	(assert (move (move_type ?*CHECK*))))
-	
+
 ; ; Call happens if check could not happen
 (defrule MOVE-SELECTION::default-move-selection-call
 	(declare (salience -2))				; ; Less importance than the default move selection announcement & retraction rules
@@ -313,11 +313,11 @@
 	(printout t "Performing default-move-selection-all-in because we could not perform any good move according to the rules!" crlf)
 	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 	(modify ?self (bet ?mymoney)))
-		
+
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; Rules for selecting move by strategy  ; 
+; ; Rules for selecting move by strategy  ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
@@ -337,7 +337,7 @@
 	(not (can_check))
 	=>
 	(assert (move (move_type ?*FOLD*) (current_bet ?mybet))))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Defensive strategy;
 ; ; ; ; ; ; ; ; ; ; ; ;
@@ -396,8 +396,8 @@
 	(not (can_small_call))
 	=>
 	(assert (move (move_type ?*FOLD*) (current_bet ?mybet))))
-	
-	
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Induce folds strategy ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -519,15 +519,15 @@
 	=>
 	(assert (move (move_type ?*ALL_IN*) (current_bet ?mymoney)))
 	(modify ?self (bet ?mymoney)))
-	
 
-; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; 
-; ; Utility rules ; 
-; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; 
 
-	
+; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ;
+; ; Utility rules ;
+; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ;
+
+
 ; ; Print out the move selected
 (defrule MOVE-SELECTION::print-move
 	(declare (salience -5000))	; ; Printing out a move should be done only when we are actually done selecting, so it is of least concern
@@ -542,7 +542,7 @@
 	(printout t crlf)); ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; OPPONENT-PLAYSTYLE-DETERMINATION MODULE ; 
+; ; OPPONENT-PLAYSTYLE-DETERMINATION MODULE ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -565,9 +565,9 @@
 		(assert-string ?line))
 	(close rf))
 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Update the facts with the current moves made by each player ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 ; ; If no player move count facts even though there is such a player, create a new player move count from scratch
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::create-new-player-move-count
@@ -580,7 +580,7 @@
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::update-player-move-count-preflop-checks-folds
 	(player (player_id ?pid) (move ?move&:(or (eq ?move ?*FOLD*) (eq ?move ?*CHECK*))))
 	(not (updated_player_move_count_preflop ?pid))
-	?pmc <- (player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds) 
+	?pmc <- (player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds)
 								(preflop_total_moves ?preflop_total_moves))
 	(game (round 0))		; ; pre-flop
 	=>
@@ -591,13 +591,13 @@
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::update-player-move-count-preflop-non-checks-folds
 	(player (player_id ?pid) (move ?move&:(and (neq ?move ?*FOLD*) (neq ?move ?*CHECK*))))
 	(not (updated_player_move_count_preflop ?pid))
-	?pmc <- (player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds) 
+	?pmc <- (player_move_count (player_id ?pid) (preflop_checks_folds ?preflop_checks_folds)
 								(preflop_total_moves ?preflop_total_moves))
 	(game (round 0))		; ; pre-flop
 	=>
 	(assert (updated_player_move_count_preflop ?pid))
 	(modify ?pmc (preflop_total_moves (+ ?preflop_total_moves 1))))
-	
+
 ; ; Update the player move counts with the current moves of each player who has checked/called in any round
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::update-player-move-count-checks-calls
 	(player (player_id ?pid) (move ?move&:(or (eq ?move ?*CHECK*) (eq ?move ?*CALL*))))
@@ -606,7 +606,7 @@
 	=>
 	(assert (updated_player_move_count_general ?pid))
 	(modify ?pmc (checks_calls (+ ?checks_calls 1))))
-	
+
 ; ; Update the player move counts with the current moves of each player who has betted/raised in any round
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::update-player-move-count-bets-raises
 	(player (player_id ?pid) (move ?move&:(or (eq ?move ?*BET*) (eq ?move ?*RAISE*))))
@@ -615,7 +615,7 @@
 	=>
 	(assert (updated_player_move_count_general ?pid))
 	(modify ?pmc (bets_raises (+ ?bets_raises 1))))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine the players' playstyles ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -628,7 +628,7 @@
 						(preflop_total_moves ?preflop_total_moves&:(<= (* 2 ?preflop_checks_folds) ?preflop_total_moves)))
 	=>
 	(modify ?player (tight_loose ?*TIGHT*)))
-	
+
 ; ; Determine if player is loose
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-loose
 	(declare (salience -1))		; ; Determination done after updating of player move counts
@@ -637,7 +637,7 @@
 						(preflop_total_moves ?preflop_total_moves&:(> (* 2 ?preflop_checks_folds) ?preflop_total_moves)))
 	=>
 	(modify ?player (tight_loose ?*LOOSE*)))
-	
+
 ; ; Determine if player is aggressive
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-aggressive
 	(declare (salience -1))		; ; Determination done after updating of player move counts
@@ -646,7 +646,7 @@
 						(bets_raises ?bets_raises&:(>= ?bets_raises ?checks_calls)))
 	=>
 	(modify ?player (aggressive_passive ?*AGGRESSIVE*)))
-	
+
 ; ; Determine if player is passive
 (defrule OPPONENT-PLAYSTYLE-DETERMINATION::determine-playstyles-passive
 	(declare (salience -1))		; ; Determination done after updating of player move counts
@@ -655,7 +655,7 @@
 						(bets_raises ?bets_raises&:(< ?bets_raises ?checks_calls)))
 	=>
 	(modify ?player (aggressive_passive ?*PASSIVE*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Write the players' move count facts to a file ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -682,7 +682,7 @@
 	(assert (wrote_player_move_count ?pid))
 	(open ?*PLAYER_MOVECOUNT_FILENAME* wf "a")
 	(printout wf
-		(str-cat 
+		(str-cat
 			"(player_move_count"
 			" (player_id " ?pid ")"
 			" (preflop_checks_folds " ?preflop_checks_folds ")"
@@ -720,7 +720,7 @@
 	(test (neq ?card1 ?card2))
 	=>
 	(modify ?self (hand_type ?*HAND_KK*))
-	(printout t "Hand is: KK" crlf))	
+	(printout t "Hand is: KK" crlf))
 (defrule OWN-HAND-DETERMINATION::determine-handtype-QQ
 	?self <- (self (hand_type nil))							; ; Determine hand type only once
 	?card1 <- (card (value 12) (location ?loc&:(eq ?loc ?*LOCATION_HOLE*)))
@@ -753,7 +753,7 @@
 	=>
 	(modify ?self (hand_type ?*HAND_99-22*))
 	(printout t "Hand is: 99-22" crlf))
-	
+
 ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ;
 ; ; Ace-X Hands ; ;
@@ -825,7 +825,7 @@
 	(printout t "Hand is: A9s-A2s" crlf))
 
 ; ; ; ; ; ; ; ; ; ;
-; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ;
 ; ; Playable Hands;
 ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ;
@@ -970,9 +970,9 @@
 	=>
 	(modify ?self (hand_type ?*HAND_54s*))
 	(printout t "Hand is: 54s" crlf))
-	
-	
-	
+
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Set hand type to a bad hand if no other rule set it ;
@@ -985,9 +985,9 @@
 	=>
 	(modify ?self (hand_type ?*HAND_BADHAND*))
 	(printout t "Hand is: bad_hand" crlf)); ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;	
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; POSSIBLE-MOVE-DETERMINATION MODULE; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; POSSIBLE-MOVE-DETERMINATION MODULE;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1012,7 +1012,7 @@
 	=>
 	(printout t "Found: can_check" crlf)
 	(assert (can_check)))
-	
+
 ; ; Determine if can play all-in (can ALWAYS all-in)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-all-in
 	(not (can_all_in))
@@ -1028,7 +1028,7 @@
 	=>
 	(printout t "Found: can_bet" crlf)
 	(assert (can_bet)))
-	
+
 ; ; Determine if can play small bet (small bet is currently defined as min_allowed_bet)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-bet
 	(not (can_small_bet))
@@ -1047,7 +1047,7 @@
 	=>
 	(printout t "Found: can_call" crlf)
 	(assert (can_call)))
-	
+
 ; ; Determine if can play small call (small call is currently defined as <= 10% of player's money)
 (defrule POSSIBLE-MOVE-DETERMINATION::check-can-small-call
 	(not (can_small_call))
@@ -1066,7 +1066,7 @@
 	=>
 	(printout t "Found: can_raise" crlf)
 	(assert (can_raise)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Preprocessing stuff for bet-sizing;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1076,7 +1076,7 @@
 	(not (bet_sizing_help))
 	=>
 	(assert (bet_sizing_help)))
-	
+
 ; ; Count the number of limpers in this round
 (defrule POSSIBLE-MOVE-DETERMINATION::count-limpers
 	?bsh <- (bet_sizing_help (limpers -1))	; ; not yet processed
@@ -1085,7 +1085,7 @@
 		(length$ (find-all-facts ((?p player)) (or (eq ?p:move ?*CALL*) (eq ?p:move ?*CHECK*)))))
 	(modify ?bsh (limpers ?limper_count))
 	(printout t "Counted number of limpers: " ?limper_count crlf))
-	
+
 ; ; Calculate preflop bet size
 (defrule POSSIBLE-MOVE-DETERMINATION::calculate-preflop-bet-size
 	?bsh <- (bet_sizing_help (limpers ?limpers&:(>= ?limpers 0)) (preflop_bet_size -1.0))		; ; limpers calculated but not preflop bet size
@@ -1118,25 +1118,25 @@
 	(bind ?num_players (+ (length$ (find-all-facts ((?p player)) TRUE)) (length$ (find-all-facts ((?s self)) TRUE))))
 	(assert (num_players ?num_players))
 	(printout t "Counted number of players: " ?num_players crlf))
-	
+
 (defrule STRATEGY-SELECTION::count-raisers
 	=>
 	(bind ?num_raisers (length$ (find-all-facts ((?p player)) (eq ?p:move ?*RAISE*))))
 	(assert (num_raisers ?num_raisers))
 	(printout t "Counted number of raisers: " ?num_raisers crlf))
-	
+
 (defrule STRATEGY-SELECTION::count-callers
 	=>
 	(bind ?num_callers (length$ (find-all-facts ((?p player)) (eq ?p:move ?*CALL*))))
 	(assert (num_callers ?num_callers))
 	(printout t "Counted number of callers: " ?num_callers crlf))
-	
+
 ; ; Consider stacks to be deep if more than half the players (other than myself) have more than or equal to 20 times the min bet
 (defrule STRATEGY-SELECTION::check-if-stacks-are-deep
 	(num_players ?np)
 	(game (min_allowed_bet ?minbet))
 	(test 	(> 	(length$ (find-all-facts ((?p player)) 		; ; Number of players (other than self) who has more than 20 times the min bet
-										(>= ?p:money (* ?minbet 20.0)))) 
+										(>= ?p:money (* ?minbet 20.0))))
 				(div (- ?np 1) 2)))	; ; Half of the players (other than myself)
 	=>
 	(assert (stacks_are_deep))
@@ -1148,175 +1148,175 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-mid-3p
 	(num_players 3)
-	?self <- (self 
+	?self <- (self
 				(position 0) 				; ; first bet, but 3 player is small, so consider this as mid position
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-3p
 	(num_players 3)
-	?self <- (self 
+	?self <- (self
 				(position 1) 				; ; first bet, but 3 player is small, so consider this as mid position
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-3p
 	(num_players 3)
-	?self <- (self 
+	?self <- (self
 				(position 2) 				; ; first bet, but 3 player is small, so consider this as mid position
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 4 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-4p
 	(num_players 4)
-	?self <- (self 
-				(position 0) 				
+	?self <- (self
+				(position 0)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-4p
 	(num_players 4)
-	?self <- (self 
-				(position 1) 				
+	?self <- (self
+				(position 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-4p
 	(num_players 4)
-	?self <- (self 
-				(position 2) 				
+	?self <- (self
+				(position 2)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-4p
 	(num_players 4)
-	?self <- (self 
-				(position 3) 				
+	?self <- (self
+				(position 3)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 5 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-5p
 	(num_players 5)
-	?self <- (self 
-				(position 0) 				
+	?self <- (self
+				(position 0)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-5p
 	(num_players 5)
-	?self <- (self 
-				(position 1) 				
+	?self <- (self
+				(position 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-5p
 	(num_players 5)
-	?self <- (self 
-				(position 2) 				
+	?self <- (self
+				(position 2)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-5p
 	(num_players 5)
-	?self <- (self 
-				(position 3) 				
+	?self <- (self
+				(position 3)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-5p
 	(num_players 5)
-	?self <- (self 
-				(position 4) 				
+	?self <- (self
+				(position 4)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 6 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-6p
 	(num_players 6)
-	?self <- (self 
-				(position 0 | 1) 				
+	?self <- (self
+				(position 0 | 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-6p
 	(num_players 6)
-	?self <- (self 
-				(position 2) 				
+	?self <- (self
+				(position 2)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-6p
 	(num_players 6)
-	?self <- (self 
-				(position 3) 				
+	?self <- (self
+				(position 3)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-6p
 	(num_players 6)
-	?self <- (self 
-				(position 4) 				
+	?self <- (self
+				(position 4)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-6p
 	(num_players 6)
-	?self <- (self 
-				(position 5) 				
+	?self <- (self
+				(position 5)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 7 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-7p
 	(num_players 7)
-	?self <- (self 
-				(position 0 | 1) 				
+	?self <- (self
+				(position 0 | 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-7p
 	(num_players 7)
-	?self <- (self 
-				(position 2 | 3) 				
+	?self <- (self
+				(position 2 | 3)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-7p
 	(num_players 7)
-	?self <- (self 
-				(position 4) 				
+	?self <- (self
+				(position 4)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-7p
 	(num_players 7)
-	?self <- (self 
-				(position 5) 				
+	?self <- (self
+				(position 5)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-7p
 	(num_players 7)
-	?self <- (self 
-				(position 6) 				
+	?self <- (self
+				(position 6)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
@@ -1327,127 +1327,127 @@
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-8p
 	(num_players 8)
-	?self <- (self 
-				(position 0 | 1) 				
+	?self <- (self
+				(position 0 | 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-8p
 	(num_players 8)
-	?self <- (self 
-				(position 2 | 3) 				
+	?self <- (self
+				(position 2 | 3)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-8p
 	(num_players 8)
-	?self <- (self 
-				(position 4 | 5) 				
+	?self <- (self
+				(position 4 | 5)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-8p
 	(num_players 8)
-	?self <- (self 
-				(position 6) 				
+	?self <- (self
+				(position 6)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-8p
 	(num_players 8)
-	?self <- (self 
-				(position 7) 				
+	?self <- (self
+				(position 7)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 9 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-9p
 	(num_players 9)
-	?self <- (self 
-				(position 0 | 1) 				
+	?self <- (self
+				(position 0 | 1)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-9p
 	(num_players 9)
-	?self <- (self 
-				(position 2 | 3 | 4) 				
+	?self <- (self
+				(position 2 | 3 | 4)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-9p
 	(num_players 9)
-	?self <- (self 
-				(position 5 | 6) 				
+	?self <- (self
+				(position 5 | 6)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-9p
 	(num_players 9)
-	?self <- (self 
-				(position 7) 				
+	?self <- (self
+				(position 7)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-9p
 	(num_players 9)
-	?self <- (self 
-				(position 8) 				
+	?self <- (self
+				(position 8)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Determine if position is early/mid/late/small_blind/big_blind (for use when determing strategy) ;
 ; ; for 10 players																					;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 (defrule STRATEGY-SELECTION::determine-position-type-early-10p
 	(num_players 10)
-	?self <- (self 
-				(position 0 | 1 | 2) 				
+	?self <- (self
+				(position 0 | 1 | 2)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_EARLY*)))
 (defrule STRATEGY-SELECTION::determine-position-type-mid-10p
 	(num_players 10)
-	?self <- (self 
-				(position 3 | 4 | 5) 				
+	?self <- (self
+				(position 3 | 4 | 5)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_MID*)))
 (defrule STRATEGY-SELECTION::determine-position-type-late-10p
 	(num_players 10)
-	?self <- (self 
-				(position 6 | 7) 				
+	?self <- (self
+				(position 6 | 7)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
 (defrule STRATEGY-SELECTION::determine-position-type-smallblind-10p
 	(num_players 10)
-	?self <- (self 
-				(position 8) 				
+	?self <- (self
+				(position 8)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_SMALLBLIND*)))
 (defrule STRATEGY-SELECTION::determine-position-type-bigblind-10p
 	(num_players 10)
-	?self <- (self 
-				(position 9) 				
+	?self <- (self
+				(position 9)
 				(position_type nil))		; ; determine position type only once
 	=>
 	(modify ?self (position_type ?*POSITION_BIGBLIND*)))
-	
+
 ; ; Default position (in case it is not a 3-10 player game)
 (defrule STRATEGY-SELECTION::determine-position-type-default
 	(declare (salience -1))
 	?self <- (self (position_type nil))
 	=>
 	(modify ?self (position_type ?*POSITION_LATE*)))
-	
+
 
 ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1469,8 +1469,8 @@
 (defrule STRATEGY-SELECTION::select-strategy-preflop-AAKKQQ
 	(game (round 0))
 	?self <- (self 	(strategy nil)		; ; Select strategy once only
-					(hand_type ?ht&:(or 
-							(eq ?ht ?*HAND_AA*) 
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AA*)
 							(eq ?ht ?*HAND_KK*)
 							(eq ?ht ?*HAND_QQ*))))
 	=>
@@ -1499,7 +1499,7 @@
 	=>
 	(assert (move (move_type ?*CALL*) (current_bet ?current_bet)))		; ; Select move immediately, because this call might not be done in the defensive strategy
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
-	
+
 ; ; 99-22: 	More than 1 raiser, cut losses (fold)
 ; ;			1 raiser & stacks are deep, call and go defensive
 ; ;			No raisers & there are callers before me, call and go defensive
@@ -1557,7 +1557,7 @@
 						(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; ; ; ; ; ; ; ;
 ; ; Ace-X hands ;
 ; ; ; ; ; ; ; ; ;
@@ -1566,12 +1566,12 @@
 (defrule STRATEGY-SELECTION::select-strategy-preflop-AKsAKo
 	(game (round 0))
 	?self <- (self 	(strategy nil)		; ; Select strategy once only
-					(hand_type ?ht&:(or 
-							(eq ?ht ?*HAND_AKs*) 
+					(hand_type ?ht&:(or
+							(eq ?ht ?*HAND_AKs*)
 							(eq ?ht ?*HAND_AKo*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; AQs, AQo, AJs: 	Have raisers, cut losses (fold)
 ; ;					No raisers, have callers, early position, cut losses (fold)
 ; ;					No raisers, have callers, mid/late/sb/bb position, induce folds (raise)
@@ -1643,7 +1643,7 @@
 										(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; AJo, ATs, ATo: 	Have raisers, cut losses (fold)
 ; ;					No raisers, have callers, early position, cut losses (fold)
 ; ;					No raisers, have callers, mid/late/sb/bb position, induce folds (raise)
@@ -1715,7 +1715,7 @@
 										(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; A9s-A2s:	Have raisers, cut losses (fold)
 ; ;				No raisers, have callers, early/mid position, cut losses (fold)
 ; ;				No raisers, have callers, late/sb/bb position, call and go defensive
@@ -1777,7 +1777,7 @@
 										(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; KQs, KQo, KJs, KJo, QJs:	Have raisers, cut losses (fold)
 ; ;								No raisers, have callers, early position, cut losses (fold)
 ; ;								No raisers, have callers, mid/late/sb/bb position, call and go defensive
@@ -1862,7 +1862,7 @@
 										(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
+
 ; ; KTs, KTo,
 ; ; QJo, QTs,
 ; ; Q9s, JTs,
@@ -1971,11 +1971,11 @@
 										(eq ?pt ?*POSITION_BIGBLIND*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
-	
 
-	
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Strategy selection during the FLOP;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1987,7 +1987,7 @@
 	(modify ?self (strategy ?*INDUCEBETS_STRATEGY*)))
 (defrule STRATEGY-SELECTION::select-strategy-flop-cut-losses
 	(game (round 1))
-	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
 																(< ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
 																(>= ?win_prob 0.0))))
 	=>
@@ -2005,7 +2005,7 @@
 													(eq ?prev_strat ?*DEFENSIVE_STRATEGY*))))
 	(num_raisers ?nr)
 	?self <- (self (strategy nil) (win_probability ?win_prob))
-	(or 
+	(or
 		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*) (<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*)))
 		(test (and (>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*) (< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
 			(eq ?nr 0))))
@@ -2014,16 +2014,16 @@
 (defrule STRATEGY-SELECTION::select-strategy-flop-defensive
 	(game (round 1))
 	(num_raisers ?nr&:(> ?nr 0))
-	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
 																(>= ?win_prob ?*WINPROB_THRESHOLD_CUTLOSSES*)
 																(< ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*))))
 	=>
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
-	
-	
-	
+
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Strategy selection during the RIVER;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -2036,20 +2036,20 @@
 (defrule STRATEGY-SELECTION::select-strategy-river-bluff
 	(game (round 3))
 	(previous_strategy (prev_round ~3))
-	?self <- (self (strategy nil) (win_probability ?win_prob&:(and 
+	?self <- (self (strategy nil) (win_probability ?win_prob&:(and
 																(> ?win_prob ?*WINPROB_THRESHOLD_DEFENSIVE*)
 																(<= ?win_prob ?*WINPROB_THRESHOLD_INDUCEBETS*))))
 	=>
 	(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*)))
 
-	
 
-	
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+
+
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Set strategy to defaults;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 (defrule STRATEGY-SELECTION::select-strategy-river-default
 	(declare (salience -9))		; ; important to cut losses on river as a default
@@ -2058,16 +2058,21 @@
 	=>
 	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 
-; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
+; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand, but to be less predictable, sometimes we induce folds
 (defrule STRATEGY-SELECTION::select-strategy-preflop-default
 	(declare (salience -10))			; ; Only set default if no other rule set it
 	(game (round 0))
 	?self <- (self (strategy nil))
 	=>
-	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+	(bind ?roll (mod (random) 3))
+	(if (>= ?roll 2)	; ; 1 in 3 times with a bad hand we will induce folds instead of cutting losses
+		then
+		(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*))
+		else
+		(modify ?self (strategy ?*CUTLOSSES_STRATEGY*))))
 
-	
-	
+
+
 ; ; If postflop but have no strategy chosen, follow the previous strategy if there is one
 (defrule STRATEGY-SELECTION::select-strategy-postflop-default-previous-strategy
 	(declare (salience -10))
@@ -2087,7 +2092,7 @@
 	(modify ?self (strategy ?*DEFENSIVE_STRATEGY*)))
 
 
-	
+
 ; ; Print out the strategy we are using to select a move
 (defrule STRATEGY-SELECTION::print-strategy-used
 	(declare (salience -100))
@@ -2096,12 +2101,12 @@
 	=>
 	(assert (printed_strategy))
 	(printout t "My strategy: " ?strat crlf))
-	
-	
-	
-	
 
-	
+
+
+
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Read the file to 'remember' what    ;
@@ -2121,7 +2126,7 @@
 	(while (neq (bind ?line (readline rf)) EOF)
 		(assert-string ?line))
 	(close rf))
-	
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ; Write the chosen strategy to file   ;

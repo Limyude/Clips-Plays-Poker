@@ -958,13 +958,18 @@
 	=>
 	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
 
-; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand
+; ; If preflop but have no strategy chosen, we should cut losses because we have a bad hand, but to be less predictable, sometimes we induce folds
 (defrule STRATEGY-SELECTION::select-strategy-preflop-default
 	(declare (salience -10))			; ; Only set default if no other rule set it
 	(game (round 0))
 	?self <- (self (strategy nil))
 	=>
-	(modify ?self (strategy ?*CUTLOSSES_STRATEGY*)))
+	(bind ?roll (mod (random) 3))
+	(if (>= ?roll 2)	; ; 1 in 3 times with a bad hand we will induce folds instead of cutting losses
+		then
+		(modify ?self (strategy ?*INDUCEFOLDS_STRATEGY*))
+		else
+		(modify ?self (strategy ?*CUTLOSSES_STRATEGY*))))
 
 	
 	

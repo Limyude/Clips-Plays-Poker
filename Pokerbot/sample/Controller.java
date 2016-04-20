@@ -323,38 +323,38 @@ public class Controller {
 
     public void displayCards(boolean showAiCards){
         if(this.state.river.size() >= 1){
-            File file = new File("card_images/" + this.state.river.get(0).getPath());
+            File file = new File("resources/card_images/" + this.state.river.get(0).getPath());
             Image image = new Image(file.toURI().toString());
             publicCard1.setImage(image);
         }
         if(this.state.river.size() >= 2){
-            File file = new File("card_images/" + this.state.river.get(1).getPath());
+            File file = new File("resources/card_images/" + this.state.river.get(1).getPath());
             Image image = new Image(file.toURI().toString());
             publicCard2.setImage(image);
         }
         if(this.state.river.size() >= 3){
-            File file = new File("card_images/" + this.state.river.get(2).getPath());
+            File file = new File("resources/card_images/" + this.state.river.get(2).getPath());
             Image image = new Image(file.toURI().toString());
             publicCard3.setImage(image);
         }
         if(this.state.river.size() >= 4){
-            File file = new File("card_images/" + this.state.river.get(3).getPath());
+            File file = new File("resources/card_images/" + this.state.river.get(3).getPath());
             Image image = new Image(file.toURI().toString());
             publicCard4.setImage(image);
         }
         if(this.state.river.size() >= 5){
-            File file = new File("card_images/" + this.state.river.get(4).getPath());
+            File file = new File("resources/card_images/" + this.state.river.get(4).getPath());
             Image image = new Image(file.toURI().toString());
             publicCard5.setImage(image);
         }
 
         if(this.state.playerCard.length >= 1){
-            File file = new File("card_images/" + this.state.playerCard[0].getPath());
+            File file = new File("resources/card_images/" + this.state.playerCard[0].getPath());
             Image image = new Image(file.toURI().toString());
             playerCard1.setImage(image);
         }
         if(this.state.playerCard.length >= 2){
-            File file = new File("card_images/" + this.state.playerCard[1].getPath());
+            File file = new File("resources/card_images/" + this.state.playerCard[1].getPath());
             Image image = new Image(file.toURI().toString());
             playerCard2.setImage(image);
         }
@@ -362,12 +362,12 @@ public class Controller {
         if(!showAiCards) return;
 
         if(this.state.aiCard.length >= 1){
-            File file = new File("card_images/" + this.state.aiCard[0].getPath());
+            File file = new File("resources/card_images/" + this.state.aiCard[0].getPath());
             Image image = new Image(file.toURI().toString());
             aiCard1.setImage(image);
         }
         if(this.state.aiCard.length >= 2){
-            File file = new File("card_images/" + this.state.aiCard[1].getPath());
+            File file = new File("resources/card_images/" + this.state.aiCard[1].getPath());
             Image image = new Image(file.toURI().toString());
             aiCard2.setImage(image);
         }
@@ -396,7 +396,7 @@ public class Controller {
         this.state.aiCard = new Card[2];
         this.state.river = new ArrayList<>();
 
-        File file = new File("card_images/empty_card.png");
+        File file = new File("resources/card_images/empty_card.png");
         Image image = new Image(file.toURI().toString());
         publicCard1.setImage(image);
         publicCard2.setImage(image);

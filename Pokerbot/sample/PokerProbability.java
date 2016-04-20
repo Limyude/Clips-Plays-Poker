@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class PokerProbability {
 
   private static final int HAND_RANK_SIZE   = 32487834;
-  private static final String HAND_RANK_FILE  = "sample/HandRanks.dat";
+  private static final String HAND_RANK_FILE  = "resources/HandRanks.dat";
 
   private static final int AHEAD        = 0;
   private static final int TIED       = 1;
@@ -283,7 +283,7 @@ public class PokerProbability {
    * Algorithm:
    *    TwoPlusTwoEvaluator
    * */
-  private int handRank(int[] playerCards, int[] publicCards) {
+  public int handRank(int[] playerCards, int[] publicCards) {
     int rank = 53;
     int[] seenCards = concat(playerCards, publicCards);
 

@@ -1,0 +1,2 @@
+javac -cp CLIPSJNI.jar:sample:. sample/*.java
+jar cmf manifest.txt cpp.jar sample/*.class resources/fxml/sample.fxml resources/fxml/stylesheet.css resources/card_images/*.png resources/bot_files/ALL.clp && echo JAR Created
